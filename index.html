@@ -290,6 +290,8 @@
   body.menu-open .mobile-menu a:nth-child(2) { transition-delay: .15s; }
   body.menu-open .mobile-menu a:nth-child(3) { transition-delay: .2s; }
   body.menu-open .mobile-menu a:nth-child(4) { transition-delay: .25s; }
+  body.menu-open .mobile-menu a:nth-child(5) { transition-delay: .3s; }
+  body.menu-open .mobile-menu a:nth-child(6) { transition-delay: .35s; }
   .mobile-menu a:hover { color: var(--accent-2); }
   .mobile-menu a.mobile-cta {
     background: var(--accent);
@@ -326,24 +328,20 @@
     z-index: 0;
   }
 
-  .hero-photo {
+  .hero-watermark {
     position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    height: 100%;
-    max-height: 920px;
-    width: auto;
-    object-fit: contain;
-    opacity: .55;
-    -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 95%);
-    mask-image: linear-gradient(to top, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 95%);
+    inset: 0;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='160'%3E%3Cg transform='rotate(-16 130 80)' fill='none' stroke='%238B8BFF'%3E%3Crect x='14' y='62' width='26' height='26' rx='7' stroke-width='2'/%3E%3Cpath d='M22 69 L17 75 L22 81' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M32 69 L37 75 L32 81' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ctext x='50' y='80' font-family='Arial, sans-serif' font-size='17' font-weight='700' fill='%238B8BFF' stroke='none' letter-spacing='.5'%3EDev.Stich%3C/text%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 260px 160px;
+    opacity: .06;
+    -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 100%);
+    mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 100%);
     pointer-events: none;
     z-index: 0;
-    will-change: transform;
   }
 
-  #hero > *:not(.hero-photo):not(.hero-glow) {
+  #hero > *:not(.hero-watermark):not(.hero-glow) {
     position: relative;
     z-index: 1;
   }
@@ -1273,6 +1271,7 @@
     <span class="logo-text">Dev<span class="logo-dot">.</span><span class="logo-accent">Stich</span></span>
   </a>
   <ul class="nav-links">
+    <li><a href="sobre.html">Sobre</a></li>
     <li><a href="#projetos">Projetos</a></li>
     <li><a href="#servicos">Serviços</a></li>
     <li><a href="#processo">Processo</a></li>
@@ -1286,6 +1285,7 @@
 
 <!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+  <a href="sobre.html">Sobre</a>
   <a href="#projetos">Projetos</a>
   <a href="#servicos">Serviços</a>
   <a href="#processo">Processo</a>
@@ -1296,7 +1296,7 @@
 <!-- HERO -->
 <section id="hero">
   <div class="hero-glow"></div>
-  <img src="hero-photo.png" alt="" class="hero-photo" id="heroPhoto">
+  <div class="hero-watermark" aria-hidden="true"></div>
   <div class="hero-tag">
     <span class="dot" aria-hidden="true"></span>
     Disponível para novos projetos
@@ -2024,28 +2024,6 @@
         btn.style.transform = '';
       });
     });
-  }
-
-  // ── HERO PHOTO PARALLAX ──────────────────────────────
-  const heroPhoto = document.getElementById('heroPhoto');
-  if (heroPhoto && isFinePointer && !reducedMotion) {
-    const hero = document.getElementById('hero');
-    hero.addEventListener('mousemove', (e) => {
-      const r = hero.getBoundingClientRect();
-      const x = (e.clientX - r.left - r.width / 2) / r.width;
-      const y = (e.clientY - r.top - r.height / 2) / r.height;
-      heroPhoto.style.transform = `translateX(calc(-50% + ${x * 14}px)) translateY(${y * 8}px)`;
-    });
-    hero.addEventListener('mouseleave', () => {
-      heroPhoto.style.transform = 'translateX(-50%)';
-    });
-    // Scroll parallax (subtle)
-    window.addEventListener('scroll', () => {
-      const y = window.scrollY;
-      if (y < window.innerHeight) {
-        heroPhoto.style.opacity = String(Math.max(0.15, 0.55 - y / 900));
-      }
-    }, { passive: true });
   }
 
   // ── CONTACT FORM ─────────────────────────────────────
