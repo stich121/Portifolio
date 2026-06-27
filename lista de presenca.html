@@ -66,7 +66,16 @@
     .icon-btn.delete { color:#ffdada; border-color:rgba(244,111,111,.32); }
     .calendar-tools { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:18px; border-bottom:1px solid var(--line); }
     .calendar-title { margin:0; font-size:1.4rem; }
+    .calendar-layout { display:grid; grid-template-columns:minmax(0,1fr) 280px; gap:18px; align-items:start; }
     .calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); }
+    .pending-panel { padding-bottom:18px; }
+    .pending-list { display:grid; gap:10px; padding:18px; }
+    .pending-card { display:block; width:100%; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.06); padding:12px; color:var(--text); text-align:left; }
+    .pending-card:hover { border-color:rgba(240,193,90,.6); }
+    .pending-card strong { display:block; }
+    .pending-card span { display:block; margin-top:4px; color:var(--gold); font-size:.82rem; font-weight:700; }
+    .pending-row { border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:12px; }
+    .pending-row p { margin:0; color:var(--muted); }
     .weekday,.day-cell { min-height:118px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); padding:10px; }
     .weekday { min-height:auto; color:var(--muted); font-size:.78rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; background:rgba(255,255,255,.04); }
     .weekday:nth-child(7n),.day-cell:nth-child(7n) { border-right:0; }
@@ -95,7 +104,7 @@
     .modal-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
     .modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
     [hidden] { display:none !important; }
-    @media (max-width:900px) { .hero,.form-grid,.list-tools,.modal-grid { grid-template-columns:1fr; } .hero-kpis { grid-template-columns:1fr; } .calendar-grid { min-width:840px; } .calendar-scroll { overflow-x:auto; } .topbar,.panel-head { align-items:flex-start; flex-direction:column; } }
+    @media (max-width:900px) { .hero,.form-grid,.list-tools,.modal-grid,.calendar-layout { grid-template-columns:1fr; } .hero-kpis { grid-template-columns:1fr; } .calendar-grid { min-width:840px; } .calendar-scroll { overflow-x:auto; } .topbar,.panel-head { align-items:flex-start; flex-direction:column; } }
   </style>
 </head>
 <body>
@@ -143,14 +152,21 @@
       </section>
 
       <section class="view active" id="calendarView">
-        <section class="panel" aria-label="Calendario de aulas">
-          <div class="calendar-tools">
-            <button class="ghost-btn" id="prevMonth" type="button">Mes anterior</button>
-            <h2 class="calendar-title" id="calendarTitle">Calendario</h2>
-            <button class="ghost-btn" id="nextMonth" type="button">Proximo mes</button>
-          </div>
-          <div class="calendar-scroll"><div class="calendar-grid" id="calendarGrid"></div></div>
-        </section>
+        <div class="calendar-layout">
+          <section class="panel" aria-label="Calendario de aulas">
+            <div class="calendar-tools">
+              <button class="ghost-btn" id="prevMonth" type="button">Mes anterior</button>
+              <h2 class="calendar-title" id="calendarTitle">Calendario</h2>
+              <button class="ghost-btn" id="nextMonth" type="button">Proximo mes</button>
+            </div>
+            <div class="calendar-scroll"><div class="calendar-grid" id="calendarGrid"></div></div>
+          </section>
+          <section class="panel pending-panel" aria-label="Reposicoes pendentes">
+            <div class="panel-head"><h2>Reposições pendentes</h2></div>
+            <div class="pending-list" id="pendingList"></div>
+            <div class="empty" id="pendingEmpty">Nenhuma reposicao pendente.</div>
+          </section>
+        </div>
       </section>
 
       <section class="view" id="studentsView">
@@ -241,6 +257,17 @@
       </div>
     </section>
   </div>
+
+  <div class="modal-backdrop" id="pendingModal" hidden>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="pendingModalTitle">
+      <h2 id="pendingModalTitle">Reposicoes pendentes</h2>
+      <p id="pendingModalSubtitle"></p>
+      <div id="pendingModalList"></div>
+      <div class="modal-actions">
+        <button class="ghost-btn" id="pendingModalClose" type="button">Fechar</button>
+      </div>
+    </section>
+  </div>
   <script>
     var AUTH_API = "/api/auth.php";
     var ATTENDANCE_API = "/api/chamada.php";
@@ -251,6 +278,7 @@
     monthCursor.setDate(1);
     var records = [];
     var calendarRecords = [];
+    var pendingReplacements = [];
     var students = [];
     var teachers = [];
     var currentTeacher = null;
@@ -297,6 +325,12 @@
     var replacementNoDate = document.getElementById("replacementNoDate");
     var replacementBack = document.getElementById("replacementBack");
     var replacementCancel = document.getElementById("replacementCancel");
+    var pendingList = document.getElementById("pendingList");
+    var pendingEmpty = document.getElementById("pendingEmpty");
+    var pendingModal = document.getElementById("pendingModal");
+    var pendingModalSubtitle = document.getElementById("pendingModalSubtitle");
+    var pendingModalList = document.getElementById("pendingModalList");
+    var pendingModalClose = document.getElementById("pendingModalClose");
     var pendingLesson = null;
     var formatter = new Intl.DateTimeFormat("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
 
@@ -345,14 +379,15 @@
       app.style.display = "block";
       applyTeacherAccess();
       var setup = canManageTeachers() ? loadTeachers().then(renderTeacherScope) : Promise.resolve(renderTeacherScope());
-      setup.then(function() { return Promise.all([loadStudents(), loadRecords(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); });
+      setup.then(function() { return Promise.all([loadStudents(), loadRecords(), loadCalendarRecords(), loadPendingReplacements()]); }).then(renderAll).catch(function(error) { alert(error.message); });
     }
-    function renderAll() { renderKpis(); renderCalendar(); renderStudents(); renderPresence(); renderTeachers(); }
+    function renderAll() { renderKpis(); renderCalendar(); renderStudents(); renderPresence(); renderTeachers(); renderPendingList(); }
     function renderKpis() { var activeStudents = students.filter(function(student) { return Number(student.isActive) === 1; }); studentCount.textContent = activeStudents.length; lessonCount.textContent = activeStudents.length; presentCount.textContent = records.filter(function(record) { return record.status === "Presente"; }).length; }
 
     function loadStudents() { return requestJson(STUDENTS_API + "?teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { students = payload.students || []; }); }
     function loadRecords() { return requestJson(ATTENDANCE_API + "?date=" + encodeURIComponent(attendanceDate.value) + "&teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { records = payload.records || []; }); }
     function loadCalendarRecords() { var range = calendarRange(); return requestJson(ATTENDANCE_API + "?start=" + encodeURIComponent(range.start) + "&end=" + encodeURIComponent(range.end) + "&teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { calendarRecords = payload.records || []; }); }
+    function loadPendingReplacements() { return requestJson(ATTENDANCE_API + "?pendingReplacements=1&teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { pendingReplacements = payload.records || []; }); }
     function canManageTeachers() { return currentTeacher && Number(currentTeacher.accessLevel) === 3; }
     function loadTeachers() { return requestJson(TEACHERS_API).then(function(payload) { teachers = payload.teachers || []; }); }
     function applyTeacherAccess() { var allowed = canManageTeachers(); teachersTab.hidden = !allowed; teachersView.hidden = !allowed; if (!allowed && teachersView.classList.contains("active")) { teachersView.classList.remove("active"); document.getElementById("calendarView").classList.add("active"); document.querySelector(".tab-btn[data-view=calendarView]").classList.add("active"); } }
@@ -399,6 +434,58 @@
       }).join("");
       renderKpis();
     }
+
+    function renderPendingList() {
+      var groups = {};
+      pendingReplacements.forEach(function(record) {
+        var id = record.studentId;
+        if (!groups[id]) groups[id] = { studentId:id, name:record.name, dates:[] };
+        groups[id].dates.push(record.attendanceDate);
+      });
+      var list = Object.keys(groups).map(function(key) { return groups[key]; });
+      pendingEmpty.style.display = list.length ? "none" : "block";
+      pendingList.innerHTML = list.map(function(group) {
+        var count = group.dates.length;
+        return "<button class=\"pending-card\" type=\"button\" data-pending-student=\"" + group.studentId + "\"><strong>" + escapeHtml(group.name) + "</strong><span>" + count + " aula" + (count > 1 ? "s" : "") + " pendente" + (count > 1 ? "s" : "") + "</span></button>";
+      }).join("");
+    }
+
+    function openPendingModal(studentId) {
+      var dates = pendingReplacements.filter(function(record) { return Number(record.studentId) === Number(studentId); });
+      if (!dates.length) return;
+      pendingModalSubtitle.textContent = dates[0].name;
+      pendingModalList.innerHTML = dates.map(function(record) {
+        return "<form class=\"pending-row\" data-pending-student=\"" + record.studentId + "\" data-pending-date=\"" + record.attendanceDate + "\"><p>Faltou em " + formatDateLabel(record.attendanceDate) + "</p><div class=\"modal-grid\"><div class=\"field\"><label>Dia da reposicao</label><input type=\"date\" required></div><div class=\"field\"><label>Horario</label><input type=\"time\" required></div></div><div class=\"modal-actions\"><button class=\"primary-btn\" type=\"submit\">Salvar reposicao</button></div></form>";
+      }).join("");
+      pendingModal.hidden = false;
+    }
+
+    function closePendingModal() { pendingModal.hidden = true; }
+
+    pendingList.addEventListener("click", function(event) {
+      var card = event.target.closest("[data-pending-student]");
+      if (!card) return;
+      openPendingModal(card.dataset.pendingStudent);
+    });
+
+    pendingModalList.addEventListener("submit", function(event) {
+      var form = event.target.closest(".pending-row");
+      if (!form) return;
+      event.preventDefault();
+      var dateInput = form.querySelector("input[type=date]");
+      var timeInput = form.querySelector("input[type=time]");
+      var studentId = form.dataset.pendingStudent;
+      saveLessonStatus(studentId, form.dataset.pendingDate, "Reposicao", dateInput.value, timeInput.value).then(function() {
+        return loadPendingReplacements();
+      }).then(function() {
+        renderPendingList();
+        var remaining = pendingReplacements.filter(function(record) { return Number(record.studentId) === Number(studentId); });
+        if (remaining.length) { openPendingModal(studentId); } else { closePendingModal(); }
+      }).catch(function(error) { alert(error.message); });
+    });
+
+    pendingModalClose.addEventListener("click", closePendingModal);
+    pendingModal.addEventListener("click", function(event) { if (event.target === pendingModal) closePendingModal(); });
 
     function renderTeachers() {
       if (!canManageTeachers()) return;
@@ -504,7 +591,7 @@
 
     studentsBody.addEventListener("click", function(event) { var toggleId = event.target.dataset.studentToggle; var deleteId = event.target.dataset.studentDelete; if (toggleId) { var student = students.find(function(item) { return String(item.id) === String(toggleId); }); requestJson(STUDENTS_API, { method:"PATCH", body:JSON.stringify({ id:toggleId, teacherId:activeTeacherId(), isActive: student && Number(student.isActive) === 1 ? 0 : 1 }) }).then(function() { return Promise.all([loadStudents(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); }); } if (deleteId && confirm("Deseja remover este aluno?")) { requestJson(STUDENTS_API, { method:"DELETE", body:JSON.stringify({ id:deleteId, teacherId:activeTeacherId() }) }).then(function() { return Promise.all([loadStudents(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); }); } });
 
-    teacherScopeSelect.addEventListener("change", function() { selectedTeacherId = Number(teacherScopeSelect.value); Promise.all([loadStudents(), loadRecords(), loadCalendarRecords()]).then(renderAll).catch(function(error) { alert(error.message); }); });
+    teacherScopeSelect.addEventListener("change", function() { selectedTeacherId = Number(teacherScopeSelect.value); Promise.all([loadStudents(), loadRecords(), loadCalendarRecords(), loadPendingReplacements()]).then(renderAll).catch(function(error) { alert(error.message); }); });
     attendanceDate.addEventListener("change", function() { Promise.all([loadRecords(), loadCalendarRecords()]).then(renderAll).catch(function(error) { alert(error.message); }); });
     teacherForm.addEventListener("submit", function(event) {
       event.preventDefault();

@@ -22,6 +22,23 @@ function valid_time_value(string $time): bool
 
 if ($method === 'GET') {
     $teacherId = resolve_teacher_scope((int)($_GET['teacherId'] ?? 0));
+
+    if (($_GET['pendingReplacements'] ?? '') === '1') {
+        $stmt = $pdo->prepare(
+            'SELECT chamadas.id AS attendanceId, alunos.id AS studentId, alunos.name,
+                    chamadas.attendance_date AS attendanceDate
+             FROM chamadas
+             INNER JOIN alunos ON alunos.id = chamadas.student_id
+             WHERE chamadas.status = "Reposicao"
+               AND chamadas.replacement_date IS NULL
+               AND alunos.teacher_id = :teacher_id
+             ORDER BY alunos.name ASC, chamadas.attendance_date ASC'
+        );
+        $stmt->execute([':teacher_id' => $teacherId]);
+
+        json_response(['teacherId' => $teacherId, 'records' => $stmt->fetchAll()]);
+    }
+
     $start = trim((string)($_GET['start'] ?? ''));
     $end = trim((string)($_GET['end'] ?? ''));
 
