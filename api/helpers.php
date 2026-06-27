@@ -26,6 +26,16 @@ function require_auth(): void
     }
 }
 
+function require_access_level(int $minimumLevel): void
+{
+    require_auth();
+
+    $level = (int)($_SESSION['teacher']['accessLevel'] ?? 0);
+    if ($level < $minimumLevel) {
+        json_response(['error' => 'Acesso permitido apenas para nivel ' . $minimumLevel . '.'], 403);
+    }
+}
+
 function valid_status(string $status): bool
 {
     return in_array($status, ['Presente', 'Pendente', 'Ausente'], true);
