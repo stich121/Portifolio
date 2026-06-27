@@ -29,6 +29,10 @@
     input,select,textarea { width:100%; min-height:46px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.07); color:var(--text); outline:none; padding:0 14px; }
     textarea { min-height:92px; padding:12px 14px; resize:vertical; }
     input:focus,select:focus,textarea:focus { border-color:rgba(98,210,162,.8); box-shadow:0 0 0 4px rgba(98,210,162,.12); }
+    .password-wrap { position:relative; }
+    .password-wrap input { padding-right:104px; }
+    .password-toggle { position:absolute; right:8px; bottom:8px; min-height:30px; border:1px solid var(--line); border-radius:8px; padding:0 10px; background:rgba(255,255,255,.08); color:var(--text); font-size:.82rem; font-weight:800; }
+    .password-toggle:hover { border-color:rgba(98,210,162,.65); }
     .primary-btn,.ghost-btn,.danger-btn,.tab-btn { display:inline-flex; align-items:center; justify-content:center; min-height:44px; border-radius:8px; padding:0 16px; font-weight:800; }
     .primary-btn { background:var(--brand); color:#07110f; }
     .ghost-btn,.tab-btn { border:1px solid var(--line); background:rgba(255,255,255,.06); color:var(--text); }
@@ -84,7 +88,7 @@
         <p>Area privada para calendario, alunos, horarios de aula e controle de presenca.</p>
         <form id="accessForm">
           <div class="field"><label for="accessLogin">Login</label><input id="accessLogin" name="accessLogin" type="text" autocomplete="username" placeholder="Digite seu login"></div>
-          <div class="field"><label for="accessPassword">Senha</label><input id="accessPassword" name="accessPassword" type="password" autocomplete="current-password" placeholder="Digite sua senha"></div>
+          <div class="field password-wrap"><label for="accessPassword">Senha</label><input id="accessPassword" name="accessPassword" type="password" autocomplete="current-password" placeholder="Digite sua senha"><button class="password-toggle" id="togglePassword" type="button" aria-controls="accessPassword" aria-label="Mostrar senha">Mostrar</button></div>
           <div class="gate-actions"><button class="primary-btn" type="submit">Entrar</button></div>
           <p class="error" id="accessError">Login ou senha incorretos.</p>
         </form>
@@ -181,6 +185,7 @@
     var accessForm = document.getElementById("accessForm");
     var accessLogin = document.getElementById("accessLogin");
     var accessPassword = document.getElementById("accessPassword");
+    var togglePassword = document.getElementById("togglePassword");
     var accessError = document.getElementById("accessError");
     var todayLabel = document.getElementById("todayLabel");
     var studentCount = document.getElementById("studentCount");
@@ -266,6 +271,13 @@
     document.getElementById("prevMonth").addEventListener("click", function() { monthCursor.setMonth(monthCursor.getMonth() - 1); renderCalendar(); });
     document.getElementById("nextMonth").addEventListener("click", function() { monthCursor.setMonth(monthCursor.getMonth() + 1); renderCalendar(); });
 
+    togglePassword.addEventListener("click", function() {
+      var isPassword = accessPassword.type === "password";
+      accessPassword.type = isPassword ? "text" : "password";
+      togglePassword.textContent = isPassword ? "Ocultar" : "Mostrar";
+      togglePassword.setAttribute("aria-label", isPassword ? "Ocultar senha" : "Mostrar senha");
+    });
+
     accessForm.addEventListener("submit", function(event) { event.preventDefault(); requestJson(AUTH_API, { method:"POST", body:JSON.stringify({ username:accessLogin.value.trim(), password:accessPassword.value }) }).then(function() { accessError.style.display = "none"; showApp(); }).catch(function(error) { accessError.textContent = error.message; accessError.style.display = "block"; accessPassword.select(); }); });
 
     studentForm.addEventListener("submit", function(event) { event.preventDefault(); var form = new FormData(studentForm); requestJson(STUDENTS_API, { method:"POST", body:JSON.stringify({ name:form.get("studentName").trim(), phone:form.get("studentPhone").trim(), classDay:form.get("classDay"), classTime:form.get("classTime"), notes:form.get("studentNotes").trim() }) }).then(function() { studentForm.reset(); return loadStudents(); }).then(renderAll).catch(function(error) { alert(error.message); }); });
@@ -285,3 +297,4 @@
   </script>
 </body>
 </html>
+
