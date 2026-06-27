@@ -10,20 +10,26 @@ $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $pdo = db();
 
 if ($method === 'GET') {
-    $stmt = $pdo->query(
-        'SELECT id, name, phone, class_day AS classDay,
-                TIME_FORMAT(class_time, "%H:%i") AS classTime,
-                duration_minutes AS durationMinutes, notes, is_active AS isActive,
-                created_at AS createdAt
+    $teacherId = resolve_teacher_scope((int)($_GET['teacherId'] ?? 0));
+    $stmt = $pdo->prepare(
+        'SELECT alunos.id, alunos.teacher_id AS teacherId, access_users.username AS teacherName,
+                alunos.name, alunos.phone, alunos.class_day AS classDay,
+                TIME_FORMAT(alunos.class_time, "%H:%i") AS classTime,
+                alunos.duration_minutes AS durationMinutes, alunos.notes,
+                alunos.is_active AS isActive, alunos.created_at AS createdAt
          FROM alunos
-         ORDER BY class_day ASC, class_time ASC, name ASC'
+         INNER JOIN access_users ON access_users.id = alunos.teacher_id
+         WHERE alunos.teacher_id = :teacher_id
+         ORDER BY alunos.class_day ASC, alunos.class_time ASC, alunos.name ASC'
     );
+    $stmt->execute([':teacher_id' => $teacherId]);
 
-    json_response(['students' => $stmt->fetchAll()]);
+    json_response(['teacherId' => $teacherId, 'students' => $stmt->fetchAll()]);
 }
 
 if ($method === 'POST') {
     $data = request_data();
+    $teacherId = resolve_teacher_scope((int)($data['teacherId'] ?? 0));
     $name = trim((string)($data['name'] ?? ''));
     $phone = trim((string)($data['phone'] ?? ''));
     $classDay = (int)($data['classDay'] ?? -1);
@@ -39,10 +45,11 @@ if ($method === 'POST') {
     }
 
     $stmt = $pdo->prepare(
-        'INSERT INTO alunos (name, phone, class_day, class_time, duration_minutes, notes)
-         VALUES (:name, :phone, :class_day, :class_time, 60, :notes)'
+        'INSERT INTO alunos (teacher_id, name, phone, class_day, class_time, duration_minutes, notes)
+         VALUES (:teacher_id, :name, :phone, :class_day, :class_time, 60, :notes)'
     );
     $stmt->execute([
+        ':teacher_id' => $teacherId,
         ':name' => $name,
         ':phone' => $phone !== '' ? $phone : null,
         ':class_day' => $classDay,
@@ -62,8 +69,9 @@ if ($method === 'PATCH') {
         json_response(['error' => 'Aluno invalido.'], 422);
     }
 
-    $stmt = $pdo->prepare('UPDATE alunos SET is_active = :is_active WHERE id = :id');
-    $stmt->execute([':is_active' => $isActive ? 1 : 0, ':id' => $id]);
+    $allowedTeacherId = resolve_teacher_scope((int)($data['teacherId'] ?? 0));
+    $stmt = $pdo->prepare('UPDATE alunos SET is_active = :is_active WHERE id = :id AND teacher_id = :teacher_id');
+    $stmt->execute([':is_active' => $isActive ? 1 : 0, ':id' => $id, ':teacher_id' => $allowedTeacherId]);
 
     json_response(['ok' => true]);
 }
@@ -76,8 +84,9 @@ if ($method === 'DELETE') {
         json_response(['error' => 'Aluno invalido.'], 422);
     }
 
-    $stmt = $pdo->prepare('DELETE FROM alunos WHERE id = :id');
-    $stmt->execute([':id' => $id]);
+    $allowedTeacherId = resolve_teacher_scope((int)($data['teacherId'] ?? 0));
+    $stmt = $pdo->prepare('DELETE FROM alunos WHERE id = :id AND teacher_id = :teacher_id');
+    $stmt->execute([':id' => $id, ':teacher_id' => $allowedTeacherId]);
 
     json_response(['ok' => true]);
 }

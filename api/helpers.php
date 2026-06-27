@@ -26,14 +26,39 @@ function require_auth(): void
     }
 }
 
+function current_teacher_id(): int
+{
+    return (int)($_SESSION['teacher']['id'] ?? 0);
+}
+
+function current_teacher_level(): int
+{
+    return (int)($_SESSION['teacher']['accessLevel'] ?? 0);
+}
+
 function require_access_level(int $minimumLevel): void
 {
     require_auth();
 
-    $level = (int)($_SESSION['teacher']['accessLevel'] ?? 0);
-    if ($level < $minimumLevel) {
+    if (current_teacher_level() < $minimumLevel) {
         json_response(['error' => 'Acesso permitido apenas para nivel ' . $minimumLevel . '.'], 403);
     }
+}
+
+function resolve_teacher_scope(int $requestedTeacherId = 0): int
+{
+    require_auth();
+
+    $ownTeacherId = current_teacher_id();
+    if ($ownTeacherId < 1) {
+        json_response(['error' => 'Professor da sessao invalido.'], 401);
+    }
+
+    if (current_teacher_level() === 3 && $requestedTeacherId > 0) {
+        return $requestedTeacherId;
+    }
+
+    return $ownTeacherId;
 }
 
 function valid_status(string $status): bool

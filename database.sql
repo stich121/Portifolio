@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS presencas (
 
 CREATE TABLE IF NOT EXISTS alunos (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  teacher_id INT UNSIGNED NULL,
   name VARCHAR(160) NOT NULL,
   phone VARCHAR(40) NULL,
   class_day TINYINT UNSIGNED NOT NULL,
@@ -47,10 +48,32 @@ CREATE TABLE IF NOT EXISTS alunos (
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
+  
+  INDEX idx_teacher (teacher_id),
   INDEX idx_class_day_time (class_day, class_time),
   INDEX idx_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+SET @student_teacher_exists := (
+  SELECT COUNT(*)
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'alunos'
+    AND COLUMN_NAME = 'teacher_id'
+);
+SET @student_teacher_sql := IF(
+  @student_teacher_exists = 0,
+  'ALTER TABLE alunos ADD COLUMN teacher_id INT UNSIGNED NULL AFTER id, ADD INDEX idx_teacher (teacher_id)',
+  'SELECT 1'
+);
+PREPARE student_teacher_stmt FROM @student_teacher_sql;
+EXECUTE student_teacher_stmt;
+DEALLOCATE PREPARE student_teacher_stmt;
+
+UPDATE alunos
+SET teacher_id = (SELECT id FROM access_users WHERE username = 'Matheus.dias' LIMIT 1)
+WHERE teacher_id IS NULL;
 CREATE TABLE IF NOT EXISTS chamadas (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   student_id INT UNSIGNED NOT NULL,
@@ -77,3 +100,8 @@ END;
 UPDATE access_users
 SET access_level = 3
 WHERE username = 'Matheus.dias';
+-- Garante que alunos antigos fiquem vinculados ao professor principal.
+UPDATE alunos
+SET teacher_id = (SELECT id FROM access_users WHERE username = 'Matheus.dias' LIMIT 1)
+WHERE teacher_id IS NULL;
+
