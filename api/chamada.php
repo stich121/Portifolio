@@ -16,8 +16,35 @@ function valid_date_value(string $date): bool
 }
 
 if ($method === 'GET') {
-    $date = trim((string)($_GET['date'] ?? date('Y-m-d')));
     $teacherId = resolve_teacher_scope((int)($_GET['teacherId'] ?? 0));
+    $start = trim((string)($_GET['start'] ?? ''));
+    $end = trim((string)($_GET['end'] ?? ''));
+
+    if ($start !== '' || $end !== '') {
+        if (!valid_date_value($start) || !valid_date_value($end) || $start > $end) {
+            json_response(['error' => 'Periodo invalido.'], 422);
+        }
+
+        $stmt = $pdo->prepare(
+            'SELECT alunos.id AS studentId, alunos.teacher_id AS teacherId,
+                    chamadas.attendance_date AS attendanceDate,
+                    chamadas.status, chamadas.id AS attendanceId
+             FROM chamadas
+             INNER JOIN alunos ON alunos.id = chamadas.student_id
+             WHERE alunos.teacher_id = :teacher_id
+               AND chamadas.attendance_date BETWEEN :start_date AND :end_date
+             ORDER BY chamadas.attendance_date ASC, alunos.class_time ASC'
+        );
+        $stmt->execute([
+            ':teacher_id' => $teacherId,
+            ':start_date' => $start,
+            ':end_date' => $end,
+        ]);
+
+        json_response(['start' => $start, 'end' => $end, 'teacherId' => $teacherId, 'records' => $stmt->fetchAll()]);
+    }
+
+    $date = trim((string)($_GET['date'] ?? date('Y-m-d')));
 
     if (!valid_date_value($date)) {
         json_response(['error' => 'Data invalida.'], 422);
@@ -75,3 +102,4 @@ if ($method === 'POST') {
 }
 
 json_response(['error' => 'Metodo nao permitido.'], 405);
+

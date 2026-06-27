@@ -63,5 +63,6 @@ function resolve_teacher_scope(int $requestedTeacherId = 0): int
 
 function valid_status(string $status): bool
 {
-    return in_array($status, ['Presente', 'Pendente', 'Ausente'], true);
+    return in_array($status, ['Presente', 'Pendente', 'Ausente', 'Reposicao'], true);
 }
+

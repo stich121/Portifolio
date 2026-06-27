@@ -73,9 +73,13 @@
     .day-number { color:var(--muted); font-size:.85rem; font-weight:800; }
     .day-cell.today .day-number { display:inline-grid; place-items:center; width:28px; height:28px; border-radius:999px; background:var(--brand); color:#07110f; }
     .day-cell.muted { opacity:.42; }
-    .lesson { margin-top:8px; padding:8px; border-left:3px solid var(--brand); border-radius:6px; background:rgba(98,210,162,.12); font-size:.82rem; line-height:1.35; }
+    .lesson { display:block; width:100%; margin-top:8px; padding:8px; border:0; border-left:3px solid var(--brand); border-radius:6px; background:rgba(98,210,162,.12); color:var(--text); font-size:.82rem; line-height:1.35; text-align:left; }
     .lesson strong { display:block; color:var(--text); }
     .lesson span { color:var(--muted); }
+    .lesson:hover { background:rgba(98,210,162,.18); }
+    .lesson.replacement { border-left-color:var(--gold); background:rgba(240,193,90,.14); }
+    .lesson.replacement:hover { background:rgba(240,193,90,.22); }
+    .lesson-status { display:inline-flex; margin-top:6px; min-height:22px; align-items:center; border-radius:999px; padding:0 8px; background:rgba(240,193,90,.16); color:#ffe1a3; font-size:.72rem; font-weight:800; }
     .student-badge { display:inline-flex; min-height:28px; align-items:center; border:1px solid var(--line); border-radius:999px; padding:0 10px; color:var(--muted); background:rgba(255,255,255,.05); font-size:.84rem; }
     .attendance-tools { display:flex; flex-wrap:wrap; align-items:end; justify-content:space-between; gap:14px; padding:18px; border-bottom:1px solid var(--line); }
     .attendance-tools .field { margin:0; min-width:220px; }
@@ -208,6 +212,7 @@
     var monthCursor = new Date();
     monthCursor.setDate(1);
     var records = [];
+    var calendarRecords = [];
     var students = [];
     var teachers = [];
     var currentTeacher = null;
@@ -257,6 +262,8 @@
     function escapeHtml(value) { return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll(String.fromCharCode(34),"&quot;").replaceAll(String.fromCharCode(39),"&#039;"); }
     function addMinutes(time, minutes) { var parts = time.split(":"); var total = Number(parts[0]) * 60 + Number(parts[1]) + minutes; return String(Math.floor(total / 60)).padStart(2,"0") + ":" + String(total % 60).padStart(2,"0"); }
     function dateKey(date) { return date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2,"0") + "-" + String(date.getDate()).padStart(2,"0"); }
+    function calendarRange() { var first = new Date(monthCursor.getFullYear(), monthCursor.getMonth(), 1); var start = new Date(first); start.setDate(first.getDate() - first.getDay()); var end = new Date(start); end.setDate(start.getDate() + 41); return { start:dateKey(start), end:dateKey(end) }; }
+    function calendarStatus(studentId, date) { var found = calendarRecords.find(function(record) { return Number(record.studentId) === Number(studentId) && record.attendanceDate === date; }); return found ? found.status : "Pendente"; }
 
     function activeTeacherId() { return canManageTeachers() && selectedTeacherId > 0 ? selectedTeacherId : Number(currentTeacher && currentTeacher.id ? currentTeacher.id : 0); }
     function selectedTeacherName() {
@@ -284,13 +291,14 @@
       app.style.display = "block";
       applyTeacherAccess();
       var setup = canManageTeachers() ? loadTeachers().then(renderTeacherScope) : Promise.resolve(renderTeacherScope());
-      setup.then(function() { return Promise.all([loadStudents(), loadRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); });
+      setup.then(function() { return Promise.all([loadStudents(), loadRecords(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); });
     }
     function renderAll() { renderKpis(); renderCalendar(); renderStudents(); renderPresence(); renderTeachers(); }
     function renderKpis() { var activeStudents = students.filter(function(student) { return Number(student.isActive) === 1; }); studentCount.textContent = activeStudents.length; lessonCount.textContent = activeStudents.length; presentCount.textContent = records.filter(function(record) { return record.status === "Presente"; }).length; }
 
     function loadStudents() { return requestJson(STUDENTS_API + "?teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { students = payload.students || []; }); }
     function loadRecords() { return requestJson(ATTENDANCE_API + "?date=" + encodeURIComponent(attendanceDate.value) + "&teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { records = payload.records || []; }); }
+    function loadCalendarRecords() { var range = calendarRange(); return requestJson(ATTENDANCE_API + "?start=" + encodeURIComponent(range.start) + "&end=" + encodeURIComponent(range.end) + "&teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { calendarRecords = payload.records || []; }); }
     function canManageTeachers() { return currentTeacher && Number(currentTeacher.accessLevel) === 3; }
     function loadTeachers() { return requestJson(TEACHERS_API).then(function(payload) { teachers = payload.teachers || []; }); }
     function applyTeacherAccess() { var allowed = canManageTeachers(); teachersTab.hidden = !allowed; teachersView.hidden = !allowed; if (!allowed && teachersView.classList.contains("active")) { teachersView.classList.remove("active"); document.getElementById("calendarView").classList.add("active"); document.querySelector(".tab-btn[data-view=calendarView]").classList.add("active"); } }
@@ -313,7 +321,7 @@
         var isToday = currentKey === today ? " today" : "";
         var lessons = students.filter(function(student) { return Number(student.isActive) === 1 && Number(student.classDay) === current.getDay(); }).sort(function(a, b) { return a.classTime.localeCompare(b.classTime); });
         html += "<div class=\"day-cell" + muted + isToday + "\"><div class=\"day-number\">" + current.getDate() + "</div>";
-        html += lessons.map(function(student) { return "<div class=\"lesson\"><strong>" + escapeHtml(student.classTime) + " - " + escapeHtml(addMinutes(student.classTime, 60)) + "</strong><span>" + escapeHtml(student.name) + "</span></div>"; }).join("");
+        html += lessons.map(function(student) { var status = calendarStatus(student.id, currentKey); var isReplacement = status === "Reposicao"; return "<button class=\"lesson " + (isReplacement ? "replacement" : "") + "\" type=\"button\" data-lesson-student=\"" + student.id + "\" data-lesson-date=\"" + currentKey + "\" data-lesson-status=\"" + status + "\"><strong>" + escapeHtml(student.classTime) + " - " + escapeHtml(addMinutes(student.classTime, 60)) + "</strong><span>" + escapeHtml(student.name) + "</span>" + (isReplacement ? "<em class=\"lesson-status\">Pendente para reposicao</em>" : "") + "</button>"; }).join("");
         html += "</div>";
       }
       calendarGrid.innerHTML = html;
@@ -333,7 +341,7 @@
       attendanceSummary.textContent = present + " presentes de " + records.length + " alunos";
       attendanceEmpty.style.display = records.length ? "none" : "block";
       attendanceBody.innerHTML = records.map(function(record) {
-        return "<tr><td>" + escapeHtml(record.name) + "</td><td>" + dayNames[Number(record.classDay)] + "</td><td>" + escapeHtml(record.classTime) + " - " + escapeHtml(addMinutes(record.classTime, 60)) + "</td><td><div class=\"status-buttons\"><button class=\"status-btn " + (record.status === "Presente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-status=\"Presente\">Presente</button><button class=\"status-btn pending " + (record.status === "Pendente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-status=\"Pendente\">Pendente</button><button class=\"status-btn absent " + (record.status === "Ausente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-status=\"Ausente\">Ausente</button></div></td></tr>";
+        return "<tr><td>" + escapeHtml(record.name) + "</td><td>" + dayNames[Number(record.classDay)] + "</td><td>" + escapeHtml(record.classTime) + " - " + escapeHtml(addMinutes(record.classTime, 60)) + "</td><td><div class=\"status-buttons\"><button class=\"status-btn " + (record.status === "Presente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-status=\"Presente\">Presente</button><button class=\"status-btn pending " + (record.status === "Pendente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-status=\"Pendente\">Pendente</button><button class=\"status-btn absent " + (record.status === "Ausente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-status=\"Ausente\">Ausente</button><button class=\"status-btn pending " + (record.status === "Reposicao" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-status=\"Reposicao\">Reposicao</button></div></td></tr>";
       }).join("");
       renderKpis();
     }
@@ -348,9 +356,24 @@
     }
 
     document.querySelectorAll(".tab-btn").forEach(function(button) { button.addEventListener("click", function() { if (button.hidden) return; document.querySelectorAll(".tab-btn").forEach(function(item) { item.classList.remove("active"); }); document.querySelectorAll(".view").forEach(function(item) { item.classList.remove("active"); }); button.classList.add("active"); document.getElementById(button.dataset.view).classList.add("active"); }); });
-    document.getElementById("prevMonth").addEventListener("click", function() { monthCursor.setMonth(monthCursor.getMonth() - 1); renderCalendar(); });
-    document.getElementById("nextMonth").addEventListener("click", function() { monthCursor.setMonth(monthCursor.getMonth() + 1); renderCalendar(); });
+    document.getElementById("prevMonth").addEventListener("click", function() { monthCursor.setMonth(monthCursor.getMonth() - 1); loadCalendarRecords().then(renderCalendar).catch(function(error) { alert(error.message); }); });
+    document.getElementById("nextMonth").addEventListener("click", function() { monthCursor.setMonth(monthCursor.getMonth() + 1); loadCalendarRecords().then(renderCalendar).catch(function(error) { alert(error.message); }); });
 
+
+    calendarGrid.addEventListener("click", function(event) {
+      var lesson = event.target.closest(".lesson");
+      if (!lesson) return;
+      var studentId = lesson.dataset.lessonStudent;
+      var date = lesson.dataset.lessonDate;
+      var currentStatus = lesson.dataset.lessonStatus;
+      var nextStatus = currentStatus === "Reposicao" ? "Pendente" : "Reposicao";
+      var message = nextStatus === "Reposicao" ? "Marcar esta aula como pendente para reposicao?" : "Confirmar que esta aula vai acontecer?";
+      if (!confirm(message)) return;
+      requestJson(ATTENDANCE_API, { method:"POST", body:JSON.stringify({ studentId:studentId, teacherId:activeTeacherId(), date:date, status:nextStatus }) }).then(function() {
+        if (attendanceDate.value === date) return Promise.all([loadRecords(), loadCalendarRecords()]);
+        return loadCalendarRecords();
+      }).then(renderAll).catch(function(error) { alert(error.message); });
+    });
     togglePassword.addEventListener("click", function() {
       var isPassword = accessPassword.type === "password";
       accessPassword.type = isPassword ? "text" : "password";
@@ -360,12 +383,12 @@
 
     accessForm.addEventListener("submit", function(event) { event.preventDefault(); requestJson(AUTH_API, { method:"POST", body:JSON.stringify({ username:accessLogin.value.trim(), password:accessPassword.value }) }).then(function(payload) { currentTeacher = payload.teacher || null; accessError.style.display = "none"; showApp(); }).catch(function(error) { accessError.textContent = error.message; accessError.style.display = "block"; accessPassword.select(); }); });
 
-    studentForm.addEventListener("submit", function(event) { event.preventDefault(); var form = new FormData(studentForm); requestJson(STUDENTS_API, { method:"POST", body:JSON.stringify({ teacherId:activeTeacherId(), name:form.get("studentName").trim(), phone:form.get("studentPhone").trim(), classDay:form.get("classDay"), classTime:form.get("classTime"), notes:form.get("studentNotes").trim() }) }).then(function() { studentForm.reset(); return loadStudents(); }).then(renderAll).catch(function(error) { alert(error.message); }); });
+    studentForm.addEventListener("submit", function(event) { event.preventDefault(); var form = new FormData(studentForm); requestJson(STUDENTS_API, { method:"POST", body:JSON.stringify({ teacherId:activeTeacherId(), name:form.get("studentName").trim(), phone:form.get("studentPhone").trim(), classDay:form.get("classDay"), classTime:form.get("classTime"), notes:form.get("studentNotes").trim() }) }).then(function() { studentForm.reset(); return Promise.all([loadStudents(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); }); });
 
-    studentsBody.addEventListener("click", function(event) { var toggleId = event.target.dataset.studentToggle; var deleteId = event.target.dataset.studentDelete; if (toggleId) { var student = students.find(function(item) { return String(item.id) === String(toggleId); }); requestJson(STUDENTS_API, { method:"PATCH", body:JSON.stringify({ id:toggleId, teacherId:activeTeacherId(), isActive: student && Number(student.isActive) === 1 ? 0 : 1 }) }).then(loadStudents).then(renderAll).catch(function(error) { alert(error.message); }); } if (deleteId && confirm("Deseja remover este aluno?")) { requestJson(STUDENTS_API, { method:"DELETE", body:JSON.stringify({ id:deleteId, teacherId:activeTeacherId() }) }).then(loadStudents).then(renderAll).catch(function(error) { alert(error.message); }); } });
+    studentsBody.addEventListener("click", function(event) { var toggleId = event.target.dataset.studentToggle; var deleteId = event.target.dataset.studentDelete; if (toggleId) { var student = students.find(function(item) { return String(item.id) === String(toggleId); }); requestJson(STUDENTS_API, { method:"PATCH", body:JSON.stringify({ id:toggleId, teacherId:activeTeacherId(), isActive: student && Number(student.isActive) === 1 ? 0 : 1 }) }).then(function() { return Promise.all([loadStudents(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); }); } if (deleteId && confirm("Deseja remover este aluno?")) { requestJson(STUDENTS_API, { method:"DELETE", body:JSON.stringify({ id:deleteId, teacherId:activeTeacherId() }) }).then(function() { return Promise.all([loadStudents(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); }); } });
 
-    teacherScopeSelect.addEventListener("change", function() { selectedTeacherId = Number(teacherScopeSelect.value); Promise.all([loadStudents(), loadRecords()]).then(renderAll).catch(function(error) { alert(error.message); }); });
-    attendanceDate.addEventListener("change", function() { loadRecords().then(renderAll).catch(function(error) { alert(error.message); }); });
+    teacherScopeSelect.addEventListener("change", function() { selectedTeacherId = Number(teacherScopeSelect.value); Promise.all([loadStudents(), loadRecords(), loadCalendarRecords()]).then(renderAll).catch(function(error) { alert(error.message); }); });
+    attendanceDate.addEventListener("change", function() { Promise.all([loadRecords(), loadCalendarRecords()]).then(renderAll).catch(function(error) { alert(error.message); }); });
     teacherForm.addEventListener("submit", function(event) {
       event.preventDefault();
       if (!canManageTeachers()) return;
@@ -384,7 +407,7 @@
       var studentId = event.target.dataset.attendanceStudent;
       var status = event.target.dataset.attendanceStatus;
       if (!studentId || !status) return;
-      requestJson(ATTENDANCE_API, { method:"POST", body:JSON.stringify({ studentId:studentId, teacherId:activeTeacherId(), date:attendanceDate.value, status:status }) }).then(loadRecords).then(renderAll).catch(function(error) { alert(error.message); });
+      requestJson(ATTENDANCE_API, { method:"POST", body:JSON.stringify({ studentId:studentId, teacherId:activeTeacherId(), date:attendanceDate.value, status:status }) }).then(function() { return Promise.all([loadRecords(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); });
     });
 
     requestJson(AUTH_API).then(function(payload) { if (payload.authenticated) { currentTeacher = payload.teacher || null; showApp(); } }).catch(function() {});
