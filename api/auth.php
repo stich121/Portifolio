@@ -21,17 +21,24 @@ if ($method !== 'POST') {
 }
 
 $data = request_data();
-$code = trim((string)($data['code'] ?? ''));
+$username = trim((string)($data['username'] ?? ''));
+$password = (string)($data['password'] ?? '');
 
-if ($code === '') {
-    json_response(['error' => 'Informe o codigo de acesso.'], 422);
+if ($username === '' || $password === '') {
+    json_response(['error' => 'Informe login e senha.'], 422);
 }
 
-$stmt = db()->query('SELECT code_hash FROM access_codes WHERE is_active = 1 ORDER BY id DESC LIMIT 1');
+$stmt = db()->prepare(
+    'SELECT password_hash
+     FROM access_users
+     WHERE username = :username AND is_active = 1
+     LIMIT 1'
+);
+$stmt->execute([':username' => $username]);
 $row = $stmt->fetch();
 
-if (!$row || !hash_equals((string)$row['code_hash'], hash('sha256', $code))) {
-    json_response(['error' => 'Codigo incorreto.'], 401);
+if (!$row || !hash_equals((string)$row['password_hash'], hash('sha256', $password))) {
+    json_response(['error' => 'Login ou senha incorretos.'], 401);
 }
 
 $_SESSION['presence_authenticated'] = true;

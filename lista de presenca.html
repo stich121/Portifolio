@@ -81,9 +81,10 @@
         <h1>Lista de Presenca</h1>
         <p>Area privada para registrar participantes, confirmar presenca e exportar a lista quando precisar.</p>
         <form id="accessForm">
-          <div class="field"><label for="accessCode">Codigo de acesso</label><input id="accessCode" name="accessCode" type="password" autocomplete="current-password" placeholder="Digite o codigo"></div>
+          <div class="field"><label for="accessLogin">Login</label><input id="accessLogin" name="accessLogin" type="text" autocomplete="username" placeholder="Digite seu login"></div>
+          <div class="field"><label for="accessPassword">Senha</label><input id="accessPassword" name="accessPassword" type="password" autocomplete="current-password" placeholder="Digite sua senha"></div>
           <div class="gate-actions"><button class="primary-btn" type="submit">Entrar</button></div>
-          <p class="error" id="accessError">Codigo incorreto.</p>
+          <p class="error" id="accessError">Login ou senha incorretos.</p>
         </form>
       </div>
     </section>
@@ -129,7 +130,8 @@
     var gate = document.getElementById("gate");
     var app = document.getElementById("app");
     var accessForm = document.getElementById("accessForm");
-    var accessCode = document.getElementById("accessCode");
+    var accessLogin = document.getElementById("accessLogin");
+    var accessPassword = document.getElementById("accessPassword");
     var accessError = document.getElementById("accessError");
     var presenceForm = document.getElementById("presenceForm");
     var listBody = document.getElementById("listBody");
@@ -222,13 +224,13 @@
       event.preventDefault();
       requestJson(AUTH_API, {
         method: "POST",
-        body: JSON.stringify({ code: accessCode.value.trim() })
+        body: JSON.stringify({ username: accessLogin.value.trim(), password: accessPassword.value })
       }).then(function() {
         accessError.style.display = "none";
         showApp();
       }).catch(function(error) {
         showMessage(error.message);
-        accessCode.select();
+        accessPassword.select();
       });
     });
 
@@ -289,5 +291,6 @@
   </script>
 </body>
 </html>
+
 
 
