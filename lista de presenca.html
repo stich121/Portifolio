@@ -88,8 +88,14 @@
     .status-btn.active { background:var(--brand); color:#07110f; border-color:transparent; }
     .status-btn.absent.active { background:rgba(244,111,111,.92); color:#180808; }
     .status-btn.pending.active { background:var(--gold); color:#171006; }
+    .modal-backdrop { position:fixed; inset:0; z-index:30; display:grid; place-items:center; padding:18px; background:rgba(0,0,0,.58); }
+    .modal-card { width:min(460px,100%); border:1px solid var(--line); border-radius:8px; background:#0f1f1b; box-shadow:0 24px 70px rgba(0,0,0,.52); padding:22px; }
+    .modal-card h2 { margin:0; font-size:1.35rem; }
+    .modal-card p { color:var(--muted); line-height:1.55; }
+    .modal-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+    .modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
     [hidden] { display:none !important; }
-    @media (max-width:900px) { .hero,.form-grid,.list-tools { grid-template-columns:1fr; } .hero-kpis { grid-template-columns:1fr; } .calendar-grid { min-width:840px; } .calendar-scroll { overflow-x:auto; } .topbar,.panel-head { align-items:flex-start; flex-direction:column; } }
+    @media (max-width:900px) { .hero,.form-grid,.list-tools,.modal-grid { grid-template-columns:1fr; } .hero-kpis { grid-template-columns:1fr; } .calendar-grid { min-width:840px; } .calendar-scroll { overflow-x:auto; } .topbar,.panel-head { align-items:flex-start; flex-direction:column; } }
   </style>
 </head>
 <body>
@@ -203,6 +209,38 @@
     </section>
   </main>
 
+
+  <div class="modal-backdrop" id="replacementModal" hidden>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="replacementTitle">
+      <h2 id="replacementTitle">Reposicao da aula</h2>
+      <p id="replacementText">Quer marcar esta aula como reposicao?</p>
+      <div id="replacementStepChoice">
+        <div class="modal-actions">
+          <button class="primary-btn" id="replacementYes" type="button">Sim</button>
+          <button class="ghost-btn" id="replacementNo" type="button">Nao</button>
+        </div>
+      </div>
+      <div id="replacementStepSchedule" hidden>
+        <div class="modal-actions">
+          <button class="primary-btn" id="replacementHasDate" type="button">Sim</button>
+          <button class="ghost-btn" id="replacementNoDate" type="button">Nao</button>
+        </div>
+      </div>
+      <form id="replacementForm" hidden>
+        <div class="modal-grid">
+          <div class="field"><label for="replacementDate">Dia da reposicao</label><input id="replacementDate" type="date"></div>
+          <div class="field"><label for="replacementTime">Horario</label><input id="replacementTime" type="time"></div>
+        </div>
+        <div class="modal-actions">
+          <button class="primary-btn" type="submit">Salvar reposicao</button>
+          <button class="ghost-btn" id="replacementBack" type="button">Voltar</button>
+        </div>
+      </form>
+      <div class="modal-actions">
+        <button class="ghost-btn" id="replacementCancel" type="button">Cancelar</button>
+      </div>
+    </section>
+  </div>
   <script>
     var AUTH_API = "/api/auth.php";
     var ATTENDANCE_API = "/api/chamada.php";
@@ -246,6 +284,20 @@
     var teacherForm = document.getElementById("teacherForm");
     var teachersBody = document.getElementById("teachersBody");
     var teachersEmpty = document.getElementById("teachersEmpty");
+    var replacementModal = document.getElementById("replacementModal");
+    var replacementText = document.getElementById("replacementText");
+    var replacementStepChoice = document.getElementById("replacementStepChoice");
+    var replacementStepSchedule = document.getElementById("replacementStepSchedule");
+    var replacementForm = document.getElementById("replacementForm");
+    var replacementDate = document.getElementById("replacementDate");
+    var replacementTime = document.getElementById("replacementTime");
+    var replacementYes = document.getElementById("replacementYes");
+    var replacementNo = document.getElementById("replacementNo");
+    var replacementHasDate = document.getElementById("replacementHasDate");
+    var replacementNoDate = document.getElementById("replacementNoDate");
+    var replacementBack = document.getElementById("replacementBack");
+    var replacementCancel = document.getElementById("replacementCancel");
+    var pendingLesson = null;
     var formatter = new Intl.DateTimeFormat("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
 
     todayLabel.textContent = new Intl.DateTimeFormat("pt-BR", { weekday:"long", day:"2-digit", month:"long" }).format(new Date());
@@ -263,7 +315,9 @@
     function addMinutes(time, minutes) { var parts = time.split(":"); var total = Number(parts[0]) * 60 + Number(parts[1]) + minutes; return String(Math.floor(total / 60)).padStart(2,"0") + ":" + String(total % 60).padStart(2,"0"); }
     function dateKey(date) { return date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2,"0") + "-" + String(date.getDate()).padStart(2,"0"); }
     function calendarRange() { var first = new Date(monthCursor.getFullYear(), monthCursor.getMonth(), 1); var start = new Date(first); start.setDate(first.getDate() - first.getDay()); var end = new Date(start); end.setDate(start.getDate() + 41); return { start:dateKey(start), end:dateKey(end) }; }
-    function calendarStatus(studentId, date) { var found = calendarRecords.find(function(record) { return Number(record.studentId) === Number(studentId) && record.attendanceDate === date; }); return found ? found.status : "Pendente"; }
+    function calendarRecord(studentId, date) { return calendarRecords.find(function(record) { return Number(record.studentId) === Number(studentId) && record.attendanceDate === date; }); }
+    function calendarStatus(studentId, date) { var found = calendarRecord(studentId, date); return found ? found.status : "Pendente"; }
+    function formatDateLabel(value) { if (!value) return ""; var parts = value.split("-"); return parts.length === 3 ? parts[2] + "/" + parts[1] + "/" + parts[0] : value; }
 
     function activeTeacherId() { return canManageTeachers() && selectedTeacherId > 0 ? selectedTeacherId : Number(currentTeacher && currentTeacher.id ? currentTeacher.id : 0); }
     function selectedTeacherName() {
@@ -321,7 +375,7 @@
         var isToday = currentKey === today ? " today" : "";
         var lessons = students.filter(function(student) { return Number(student.isActive) === 1 && Number(student.classDay) === current.getDay(); }).sort(function(a, b) { return a.classTime.localeCompare(b.classTime); });
         html += "<div class=\"day-cell" + muted + isToday + "\"><div class=\"day-number\">" + current.getDate() + "</div>";
-        html += lessons.map(function(student) { var status = calendarStatus(student.id, currentKey); var isReplacement = status === "Reposicao"; return "<button class=\"lesson " + (isReplacement ? "replacement" : "") + "\" type=\"button\" data-lesson-student=\"" + student.id + "\" data-lesson-date=\"" + currentKey + "\" data-lesson-status=\"" + status + "\"><strong>" + escapeHtml(student.classTime) + " - " + escapeHtml(addMinutes(student.classTime, 60)) + "</strong><span>" + escapeHtml(student.name) + "</span>" + (isReplacement ? "<em class=\"lesson-status\">Pendente para reposicao</em>" : "") + "</button>"; }).join("");
+        html += lessons.map(function(student) { var record = calendarRecord(student.id, currentKey) || {}; var status = record.status || "Pendente"; var isReplacement = status === "Reposicao"; var replacementInfo = record.replacementDate ? " - " + formatDateLabel(record.replacementDate) + (record.replacementTime ? " as " + record.replacementTime : "") : ""; return "<button class=\"lesson " + (isReplacement ? "replacement" : "") + "\" type=\"button\" data-lesson-student=\"" + student.id + "\" data-lesson-date=\"" + currentKey + "\" data-lesson-status=\"" + status + "\"><strong>" + escapeHtml(student.classTime) + " - " + escapeHtml(addMinutes(student.classTime, 60)) + "</strong><span>" + escapeHtml(student.name) + "</span>" + (isReplacement ? "<em class=\"lesson-status\">Pendente para reposicao" + escapeHtml(replacementInfo) + "</em>" : "") + "</button>"; }).join("");
         html += "</div>";
       }
       calendarGrid.innerHTML = html;
@@ -360,19 +414,82 @@
     document.getElementById("nextMonth").addEventListener("click", function() { monthCursor.setMonth(monthCursor.getMonth() + 1); loadCalendarRecords().then(renderCalendar).catch(function(error) { alert(error.message); }); });
 
 
+    function saveLessonStatus(studentId, date, status, dateReplacement, timeReplacement) {
+      return requestJson(ATTENDANCE_API, { method:"POST", body:JSON.stringify({ studentId:studentId, teacherId:activeTeacherId(), date:date, status:status, replacementDate:dateReplacement || "", replacementTime:timeReplacement || "" }) }).then(function() {
+        if (attendanceDate.value === date) return Promise.all([loadRecords(), loadCalendarRecords()]);
+        return loadCalendarRecords();
+      }).then(renderAll);
+    }
+
+    function showReplacementStep(step) {
+      replacementStepChoice.hidden = step !== "choice";
+      replacementStepSchedule.hidden = step !== "schedule";
+      replacementForm.hidden = step !== "form";
+    }
+
+    function closeReplacementModal() {
+      replacementModal.hidden = true;
+      pendingLesson = null;
+      replacementForm.reset();
+    }
+
+    function openReplacementModal(lesson) {
+      var student = students.find(function(item) { return Number(item.id) === Number(lesson.dataset.lessonStudent); });
+      var record = calendarRecord(lesson.dataset.lessonStudent, lesson.dataset.lessonDate) || {};
+      pendingLesson = { studentId:lesson.dataset.lessonStudent, date:lesson.dataset.lessonDate };
+      replacementText.textContent = "Quer marcar a aula de " + (student ? student.name : "aluno") + " como reposicao?";
+      replacementDate.value = record.replacementDate || "";
+      replacementTime.value = record.replacementTime || "";
+      showReplacementStep("choice");
+      replacementModal.hidden = false;
+    }
+
     calendarGrid.addEventListener("click", function(event) {
       var lesson = event.target.closest(".lesson");
       if (!lesson) return;
-      var studentId = lesson.dataset.lessonStudent;
-      var date = lesson.dataset.lessonDate;
-      var currentStatus = lesson.dataset.lessonStatus;
-      var nextStatus = currentStatus === "Reposicao" ? "Pendente" : "Reposicao";
-      var message = nextStatus === "Reposicao" ? "Marcar esta aula como pendente para reposicao?" : "Confirmar que esta aula vai acontecer?";
-      if (!confirm(message)) return;
-      requestJson(ATTENDANCE_API, { method:"POST", body:JSON.stringify({ studentId:studentId, teacherId:activeTeacherId(), date:date, status:nextStatus }) }).then(function() {
-        if (attendanceDate.value === date) return Promise.all([loadRecords(), loadCalendarRecords()]);
-        return loadCalendarRecords();
-      }).then(renderAll).catch(function(error) { alert(error.message); });
+      openReplacementModal(lesson);
+    });
+
+    replacementYes.addEventListener("click", function() {
+      if (!pendingLesson) return;
+      replacementText.textContent = "Ja tem dia e horario da reposicao?";
+      showReplacementStep("schedule");
+    });
+
+    replacementNo.addEventListener("click", function() {
+      if (!pendingLesson) return;
+      saveLessonStatus(pendingLesson.studentId, pendingLesson.date, "Pendente", "", "").then(closeReplacementModal).catch(function(error) { alert(error.message); });
+    });
+
+    replacementHasDate.addEventListener("click", function() {
+      replacementText.textContent = "Informe o dia e horario da reposicao.";
+      showReplacementStep("form");
+    });
+
+    replacementNoDate.addEventListener("click", function() {
+      if (!pendingLesson) return;
+      saveLessonStatus(pendingLesson.studentId, pendingLesson.date, "Reposicao", "", "").then(closeReplacementModal).catch(function(error) { alert(error.message); });
+    });
+
+    replacementBack.addEventListener("click", function() {
+      replacementText.textContent = "Ja tem dia e horario da reposicao?";
+      showReplacementStep("schedule");
+    });
+
+    replacementCancel.addEventListener("click", closeReplacementModal);
+
+    replacementModal.addEventListener("click", function(event) {
+      if (event.target === replacementModal) closeReplacementModal();
+    });
+
+    replacementForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+      if (!pendingLesson) return;
+      if (!replacementDate.value || !replacementTime.value) {
+        alert("Informe o dia e o horario da reposicao.");
+        return;
+      }
+      saveLessonStatus(pendingLesson.studentId, pendingLesson.date, "Reposicao", replacementDate.value, replacementTime.value).then(closeReplacementModal).catch(function(error) { alert(error.message); });
     });
     togglePassword.addEventListener("click", function() {
       var isPassword = accessPassword.type === "password";

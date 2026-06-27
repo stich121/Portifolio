@@ -79,6 +79,8 @@ CREATE TABLE IF NOT EXISTS chamadas (
   student_id INT UNSIGNED NOT NULL,
   attendance_date DATE NOT NULL,
   status ENUM('Presente', 'Pendente', 'Ausente', 'Reposicao') NOT NULL DEFAULT 'Pendente',
+  replacement_date DATE NULL,
+  replacement_time TIME NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -87,6 +89,38 @@ CREATE TABLE IF NOT EXISTS chamadas (
   CONSTRAINT fk_chamadas_student FOREIGN KEY (student_id) REFERENCES alunos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ALTER TABLE chamadas MODIFY status ENUM('Presente', 'Pendente', 'Ausente', 'Reposicao') NOT NULL DEFAULT 'Pendente';
+
+SET @replacement_date_exists := (
+  SELECT COUNT(*)
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'chamadas'
+    AND COLUMN_NAME = 'replacement_date'
+);
+SET @replacement_date_sql := IF(
+  @replacement_date_exists = 0,
+  'ALTER TABLE chamadas ADD COLUMN replacement_date DATE NULL AFTER status',
+  'SELECT 1'
+);
+PREPARE replacement_date_stmt FROM @replacement_date_sql;
+EXECUTE replacement_date_stmt;
+DEALLOCATE PREPARE replacement_date_stmt;
+
+SET @replacement_time_exists := (
+  SELECT COUNT(*)
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'chamadas'
+    AND COLUMN_NAME = 'replacement_time'
+);
+SET @replacement_time_sql := IF(
+  @replacement_time_exists = 0,
+  'ALTER TABLE chamadas ADD COLUMN replacement_time TIME NULL AFTER replacement_date',
+  'SELECT 1'
+);
+PREPARE replacement_time_stmt FROM @replacement_time_sql;
+EXECUTE replacement_time_stmt;
+DEALLOCATE PREPARE replacement_time_stmt;
 
 
 INSERT INTO access_users (username, password_hash, access_level, is_active)

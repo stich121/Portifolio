@@ -15,6 +15,11 @@ function valid_date_value(string $date): bool
     return $parsed instanceof DateTime && $parsed->format('Y-m-d') === $date;
 }
 
+function valid_time_value(string $time): bool
+{
+    return preg_match('/^\d{2}:\d{2}$/', $time) === 1;
+}
+
 if ($method === 'GET') {
     $teacherId = resolve_teacher_scope((int)($_GET['teacherId'] ?? 0));
     $start = trim((string)($_GET['start'] ?? ''));
@@ -28,7 +33,10 @@ if ($method === 'GET') {
         $stmt = $pdo->prepare(
             'SELECT alunos.id AS studentId, alunos.teacher_id AS teacherId,
                     chamadas.attendance_date AS attendanceDate,
-                    chamadas.status, chamadas.id AS attendanceId
+                    chamadas.status,
+                    chamadas.replacement_date AS replacementDate,
+                    TIME_FORMAT(chamadas.replacement_time, "%H:%i") AS replacementTime,
+                    chamadas.id AS attendanceId
              FROM chamadas
              INNER JOIN alunos ON alunos.id = chamadas.student_id
              WHERE alunos.teacher_id = :teacher_id
@@ -56,6 +64,8 @@ if ($method === 'GET') {
                 alunos.class_day AS classDay,
                 TIME_FORMAT(alunos.class_time, "%H:%i") AS classTime,
                 COALESCE(chamadas.status, \'Pendente\') AS status,
+                chamadas.replacement_date AS replacementDate,
+                TIME_FORMAT(chamadas.replacement_time, "%H:%i") AS replacementTime,
                 chamadas.id AS attendanceId
          FROM alunos
          INNER JOIN access_users ON access_users.id = alunos.teacher_id
@@ -75,9 +85,24 @@ if ($method === 'POST') {
     $studentId = (int)($data['studentId'] ?? 0);
     $date = trim((string)($data['date'] ?? ''));
     $status = trim((string)($data['status'] ?? 'Pendente'));
+    $replacementDate = trim((string)($data['replacementDate'] ?? ''));
+    $replacementTime = trim((string)($data['replacementTime'] ?? ''));
 
     if ($studentId < 1 || !valid_date_value($date) || !valid_status($status)) {
         json_response(['error' => 'Dados invalidos.'], 422);
+    }
+
+    if ($replacementDate !== '' && !valid_date_value($replacementDate)) {
+        json_response(['error' => 'Data da reposicao invalida.'], 422);
+    }
+
+    if ($replacementTime !== '' && !valid_time_value($replacementTime)) {
+        json_response(['error' => 'Horario da reposicao invalido.'], 422);
+    }
+
+    if ($status !== 'Reposicao') {
+        $replacementDate = '';
+        $replacementTime = '';
     }
 
     $allowedTeacherId = resolve_teacher_scope((int)($data['teacherId'] ?? 0));
@@ -88,18 +113,23 @@ if ($method === 'POST') {
     }
 
     $stmt = $pdo->prepare(
-        'INSERT INTO chamadas (student_id, attendance_date, status)
-         VALUES (:student_id, :attendance_date, :status)
-         ON DUPLICATE KEY UPDATE status = VALUES(status), updated_at = CURRENT_TIMESTAMP'
+        'INSERT INTO chamadas (student_id, attendance_date, status, replacement_date, replacement_time)
+         VALUES (:student_id, :attendance_date, :status, :replacement_date, :replacement_time)
+         ON DUPLICATE KEY UPDATE
+           status = VALUES(status),
+           replacement_date = VALUES(replacement_date),
+           replacement_time = VALUES(replacement_time),
+           updated_at = CURRENT_TIMESTAMP'
     );
     $stmt->execute([
         ':student_id' => $studentId,
         ':attendance_date' => $date,
         ':status' => $status,
+        ':replacement_date' => $replacementDate !== '' ? $replacementDate : null,
+        ':replacement_time' => $replacementTime !== '' ? $replacementTime . ':00' : null,
     ]);
 
     json_response(['ok' => true]);
 }
 
 json_response(['error' => 'Metodo nao permitido.'], 405);
-
