@@ -38,6 +38,7 @@
     .ghost-btn,.tab-btn { border:1px solid var(--line); background:rgba(255,255,255,.06); color:var(--text); }
     .danger-btn { background:rgba(244,111,111,.16); color:#ffdada; border:1px solid rgba(244,111,111,.32); }
     .gate-actions,.toolbar,.form-actions,.tabs { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
+    .teacher-scope { display:grid; gap:8px; width:min(360px,100%); margin-top:16px; }
     .error { display:none; margin-top:14px; color:#ffdada; font-weight:700; }
     .app,.view { display:none; }
     .view.active { display:block; }
@@ -118,6 +119,10 @@
             <button class="tab-btn" type="button" data-view="studentsView">Alunos</button>
             <button class="tab-btn" type="button" data-view="presenceView">Presenca</button>
             <button class="tab-btn" id="teachersTab" type="button" data-view="teachersView" hidden>Professores</button>
+          </div>
+          <div class="teacher-scope" id="teacherScope" hidden>
+            <label for="teacherScopeSelect">Ver alunos do professor</label>
+            <select id="teacherScopeSelect"></select>
           </div>
         </div>
         <div class="hero-kpis">
@@ -206,6 +211,7 @@
     var students = [];
     var teachers = [];
     var currentTeacher = null;
+    var selectedTeacherId = 0;
 
     var gate = document.getElementById("gate");
     var app = document.getElementById("app");
@@ -252,6 +258,27 @@
     function addMinutes(time, minutes) { var parts = time.split(":"); var total = Number(parts[0]) * 60 + Number(parts[1]) + minutes; return String(Math.floor(total / 60)).padStart(2,"0") + ":" + String(total % 60).padStart(2,"0"); }
     function dateKey(date) { return date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2,"0") + "-" + String(date.getDate()).padStart(2,"0"); }
 
+    function activeTeacherId() { return canManageTeachers() && selectedTeacherId > 0 ? selectedTeacherId : Number(currentTeacher && currentTeacher.id ? currentTeacher.id : 0); }
+    function selectedTeacherName() {
+      var id = activeTeacherId();
+      var teacher = teachers.find(function(item) { return Number(item.id) === Number(id); });
+      return teacher ? teacher.username : (currentTeacher ? currentTeacher.username : "Professor");
+    }
+    function renderTeacherScope() {
+      if (!teacherScope || !teacherScopeSelect) return;
+      if (!canManageTeachers()) {
+        teacherScope.hidden = true;
+        selectedTeacherId = Number(currentTeacher && currentTeacher.id ? currentTeacher.id : 0);
+        return;
+      }
+      if (!selectedTeacherId) selectedTeacherId = Number(currentTeacher && currentTeacher.id ? currentTeacher.id : 0);
+      teacherScope.hidden = false;
+      teacherScopeSelect.innerHTML = teachers.map(function(teacher) {
+        return "<option value=\"" + teacher.id + "\">" + escapeHtml(teacher.username) + " - Nivel " + escapeHtml(teacher.accessLevel) + "</option>";
+      }).join("");
+      teacherScopeSelect.value = String(selectedTeacherId);
+    }
+
     function showApp() {
       gate.style.display = "none";
       app.style.display = "block";
@@ -262,8 +289,8 @@
     function renderAll() { renderKpis(); renderCalendar(); renderStudents(); renderPresence(); renderTeachers(); }
     function renderKpis() { var activeStudents = students.filter(function(student) { return Number(student.isActive) === 1; }); studentCount.textContent = activeStudents.length; lessonCount.textContent = activeStudents.length; presentCount.textContent = records.filter(function(record) { return record.status === "Presente"; }).length; }
 
-    function loadStudents() { return requestJson(STUDENTS_API).then(function(payload) { students = payload.students || []; }); }
-    function loadRecords() { return requestJson(ATTENDANCE_API + "?date=" + encodeURIComponent(attendanceDate.value)).then(function(payload) { records = payload.records || []; }); }
+    function loadStudents() { return requestJson(STUDENTS_API + "?teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { students = payload.students || []; }); }
+    function loadRecords() { return requestJson(ATTENDANCE_API + "?date=" + encodeURIComponent(attendanceDate.value) + "&teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { records = payload.records || []; }); }
     function canManageTeachers() { return currentTeacher && Number(currentTeacher.accessLevel) === 3; }
     function loadTeachers() { return requestJson(TEACHERS_API).then(function(payload) { teachers = payload.teachers || []; }); }
     function applyTeacherAccess() { var allowed = canManageTeachers(); teachersTab.hidden = !allowed; teachersView.hidden = !allowed; if (!allowed && teachersView.classList.contains("active")) { teachersView.classList.remove("active"); document.getElementById("calendarView").classList.add("active"); document.querySelector(".tab-btn[data-view=calendarView]").classList.add("active"); } }
@@ -364,11 +391,4 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
 
