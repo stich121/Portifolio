@@ -19,6 +19,21 @@ CREATE TABLE IF NOT EXISTS presencas (
   INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS alunos (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR(160) NOT NULL,
+  phone VARCHAR(40) NULL,
+  class_day TINYINT UNSIGNED NOT NULL,
+  class_time TIME NOT NULL,
+  duration_minutes SMALLINT UNSIGNED NOT NULL DEFAULT 60,
+  notes VARCHAR(255) NULL,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  INDEX idx_class_day_time (class_day, class_time),
+  INDEX idx_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 INSERT INTO access_users (username, password_hash, is_active)
 SELECT 'Matheus.dias', 'ce79148500525a61846e79dddcee0cb5cc9db11f41a499fde5ae34379872ade1', 1
 WHERE NOT EXISTS (SELECT 1 FROM access_users WHERE username = 'Matheus.dias');

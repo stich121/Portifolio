@@ -4,73 +4,75 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Lista de Presenca | Devstich</title>
+  <title>Agenda de Aulas | Devstich</title>
   <style>
-    :root {
-      color-scheme: dark;
-      --bg: #07110f;
-      --panel: #0f1f1b;
-      --line: rgba(255,255,255,.12);
-      --text: #f4fbf7;
-      --muted: #a7b9b1;
-      --brand: #62d2a2;
-      --gold: #f0c15a;
-      --danger: #f46f6f;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    * { box-sizing: border-box; }
-    body { min-height: 100vh; margin: 0; background: linear-gradient(130deg, rgba(98,210,162,.12), transparent 34%), radial-gradient(circle at top right, rgba(240,193,90,.16), transparent 30%), var(--bg); color: var(--text); }
-    button, input, select { font: inherit; }
-    button { border: 0; cursor: pointer; }
-    .page { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0; }
-    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0 28px; }
-    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-    .brand-mark { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.06); color: var(--brand); font-weight: 800; }
-    .brand strong, .brand span { display: block; }
-    .brand span { color: var(--muted); font-size: .92rem; margin-top: 2px; }
-    .status-pill { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: rgba(255,255,255,.05); white-space: nowrap; }
-    .status-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--brand); box-shadow: 0 0 18px rgba(98,210,162,.9); }
-    .gate { display: grid; min-height: calc(100vh - 64px); place-items: center; padding: 28px 0; }
-    .gate-card, .panel { border: 1px solid var(--line); border-radius: 8px; background: rgba(15,31,27,.92); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
-    .gate-card { width: min(460px, 100%); padding: 28px; }
-    .gate-card h1, .hero h1 { margin: 20px 0 0; font-size: clamp(2.1rem, 6vw, 4.8rem); line-height: .98; letter-spacing: 0; }
-    .gate-card p, .hero p { color: var(--muted); line-height: 1.65; }
-    .field { display: grid; gap: 8px; margin: 18px 0 0; }
-    label { color: var(--muted); font-size: .9rem; font-weight: 700; }
-    input, select { width: 100%; min-height: 46px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.07); color: var(--text); outline: none; padding: 0 14px; }
-    input:focus, select:focus { border-color: rgba(98,210,162,.8); box-shadow: 0 0 0 4px rgba(98,210,162,.12); }
-    .primary-btn, .ghost-btn, .danger-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 8px; padding: 0 16px; font-weight: 800; }
-    .primary-btn { background: var(--brand); color: #07110f; }
-    .ghost-btn { border: 1px solid var(--line); background: rgba(255,255,255,.06); color: var(--text); }
-    .danger-btn { background: rgba(244,111,111,.16); color: #ffdada; border: 1px solid rgba(244,111,111,.32); }
-    .gate-actions, .toolbar, .form-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-    .error { display: none; margin-top: 14px; color: #ffdada; font-weight: 700; }
-    .app { display: none; }
-    .hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr); gap: 24px; align-items: end; padding: 30px 0 26px; }
-    .hero-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .kpi { min-height: 104px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.06); padding: 16px; }
-    .kpi span { color: var(--muted); font-size: .86rem; font-weight: 700; }
-    .kpi strong { display: block; margin-top: 10px; font-size: clamp(1.8rem, 4vw, 2.7rem); line-height: 1; }
-    .panel { margin-top: 18px; overflow: hidden; }
-    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); padding: 18px; }
-    .panel-head h2 { margin: 0; font-size: 1.1rem; }
-    .form-grid { display: grid; grid-template-columns: 1.1fr .8fr .8fr; gap: 14px; padding: 18px; }
-    .form-actions { grid-column: 1 / -1; margin-top: 0; }
-    .list-tools { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(150px, 220px); gap: 12px; padding: 18px; border-bottom: 1px solid var(--line); }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 720px; }
-    th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
-    th { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; background: rgba(255,255,255,.04); }
-    tr:last-child td { border-bottom: 0; }
-    .empty { padding: 34px 18px; color: var(--muted); text-align: center; }
-    .row-actions { display: flex; gap: 8px; justify-content: flex-end; }
-    .icon-btn { display: inline-grid; width: 36px; height: 36px; place-items: center; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.06); color: var(--text); }
-    .icon-btn.delete { color: #ffdada; border-color: rgba(244,111,111,.32); }
-    @media (max-width: 820px) {
-      .hero, .form-grid, .list-tools { grid-template-columns: 1fr; }
-      .hero-kpis { grid-template-columns: 1fr; }
-      .topbar, .panel-head { align-items: flex-start; flex-direction: column; }
-    }
+    :root { color-scheme: dark; --bg:#07110f; --panel:#0f1f1b; --line:rgba(255,255,255,.12); --text:#f4fbf7; --muted:#a7b9b1; --brand:#62d2a2; --gold:#f0c15a; --danger:#f46f6f; --blue:#7cc7ff; font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    body { min-height:100vh; margin:0; background:linear-gradient(130deg,rgba(98,210,162,.12),transparent 34%),radial-gradient(circle at top right,rgba(240,193,90,.16),transparent 30%),var(--bg); color:var(--text); }
+    button,input,select,textarea { font:inherit; }
+    button { border:0; cursor:pointer; }
+    .page { width:min(1180px,calc(100% - 32px)); margin:0 auto; padding:32px 0; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 0 28px; }
+    .brand { display:flex; align-items:center; gap:12px; min-width:0; }
+    .brand-mark { display:grid; width:42px; height:42px; place-items:center; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.06); color:var(--brand); font-weight:800; }
+    .brand strong,.brand span { display:block; }
+    .brand span { color:var(--muted); font-size:.92rem; margin-top:2px; }
+    .status-pill { display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 12px; border:1px solid var(--line); border-radius:999px; color:var(--muted); background:rgba(255,255,255,.05); white-space:nowrap; }
+    .status-dot { width:8px; height:8px; border-radius:999px; background:var(--brand); box-shadow:0 0 18px rgba(98,210,162,.9); }
+    .gate { display:grid; min-height:calc(100vh - 64px); place-items:center; padding:28px 0; }
+    .gate-card,.panel { border:1px solid var(--line); border-radius:8px; background:rgba(15,31,27,.92); box-shadow:0 20px 60px rgba(0,0,0,.35); }
+    .gate-card { width:min(460px,100%); padding:28px; }
+    .gate-card h1,.hero h1 { margin:20px 0 0; font-size:clamp(2.1rem,6vw,4.4rem); line-height:.98; letter-spacing:0; }
+    .gate-card p,.hero p { color:var(--muted); line-height:1.65; }
+    .field { display:grid; gap:8px; margin:18px 0 0; }
+    label { color:var(--muted); font-size:.9rem; font-weight:700; }
+    input,select,textarea { width:100%; min-height:46px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.07); color:var(--text); outline:none; padding:0 14px; }
+    textarea { min-height:92px; padding:12px 14px; resize:vertical; }
+    input:focus,select:focus,textarea:focus { border-color:rgba(98,210,162,.8); box-shadow:0 0 0 4px rgba(98,210,162,.12); }
+    .primary-btn,.ghost-btn,.danger-btn,.tab-btn { display:inline-flex; align-items:center; justify-content:center; min-height:44px; border-radius:8px; padding:0 16px; font-weight:800; }
+    .primary-btn { background:var(--brand); color:#07110f; }
+    .ghost-btn,.tab-btn { border:1px solid var(--line); background:rgba(255,255,255,.06); color:var(--text); }
+    .danger-btn { background:rgba(244,111,111,.16); color:#ffdada; border:1px solid rgba(244,111,111,.32); }
+    .gate-actions,.toolbar,.form-actions,.tabs { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
+    .error { display:none; margin-top:14px; color:#ffdada; font-weight:700; }
+    .app,.view { display:none; }
+    .view.active { display:block; }
+    .tab-btn.active { background:var(--brand); color:#07110f; border-color:transparent; }
+    .hero { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr); gap:24px; align-items:end; padding:30px 0 20px; }
+    .hero-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .kpi { min-height:104px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.06); padding:16px; }
+    .kpi span { color:var(--muted); font-size:.86rem; font-weight:700; }
+    .kpi strong { display:block; margin-top:10px; font-size:clamp(1.8rem,4vw,2.7rem); line-height:1; }
+    .panel { margin-top:18px; overflow:hidden; }
+    .panel-head { display:flex; align-items:center; justify-content:space-between; gap:16px; border-bottom:1px solid var(--line); padding:18px; }
+    .panel-head h2 { margin:0; font-size:1.1rem; }
+    .form-grid { display:grid; grid-template-columns:1.1fr .8fr .7fr .7fr; gap:14px; padding:18px; }
+    .presence-grid { grid-template-columns:1.1fr .8fr .8fr; }
+    .form-actions { grid-column:1 / -1; margin-top:0; }
+    .list-tools { display:grid; grid-template-columns:minmax(180px,1fr) minmax(150px,220px); gap:12px; padding:18px; border-bottom:1px solid var(--line); }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; min-width:760px; }
+    th,td { padding:14px 18px; text-align:left; border-bottom:1px solid var(--line); vertical-align:middle; }
+    th { color:var(--muted); font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; background:rgba(255,255,255,.04); }
+    tr:last-child td { border-bottom:0; }
+    .empty { padding:34px 18px; color:var(--muted); text-align:center; }
+    .row-actions { display:flex; gap:8px; justify-content:flex-end; }
+    .icon-btn { display:inline-grid; width:36px; height:36px; place-items:center; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.06); color:var(--text); }
+    .icon-btn.delete { color:#ffdada; border-color:rgba(244,111,111,.32); }
+    .calendar-tools { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:18px; border-bottom:1px solid var(--line); }
+    .calendar-title { margin:0; font-size:1.4rem; }
+    .calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); }
+    .weekday,.day-cell { min-height:118px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); padding:10px; }
+    .weekday { min-height:auto; color:var(--muted); font-size:.78rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; background:rgba(255,255,255,.04); }
+    .weekday:nth-child(7n),.day-cell:nth-child(7n) { border-right:0; }
+    .day-number { color:var(--muted); font-size:.85rem; font-weight:800; }
+    .day-cell.today .day-number { display:inline-grid; place-items:center; width:28px; height:28px; border-radius:999px; background:var(--brand); color:#07110f; }
+    .day-cell.muted { opacity:.42; }
+    .lesson { margin-top:8px; padding:8px; border-left:3px solid var(--brand); border-radius:6px; background:rgba(98,210,162,.12); font-size:.82rem; line-height:1.35; }
+    .lesson strong { display:block; color:var(--text); }
+    .lesson span { color:var(--muted); }
+    .student-badge { display:inline-flex; min-height:28px; align-items:center; border:1px solid var(--line); border-radius:999px; padding:0 10px; color:var(--muted); background:rgba(255,255,255,.05); font-size:.84rem; }
+    @media (max-width:900px) { .hero,.form-grid,.list-tools { grid-template-columns:1fr; } .hero-kpis { grid-template-columns:1fr; } .calendar-grid { min-width:840px; } .calendar-scroll { overflow-x:auto; } .topbar,.panel-head { align-items:flex-start; flex-direction:column; } }
   </style>
 </head>
 <body>
@@ -78,8 +80,8 @@
     <section class="gate" id="gate">
       <div class="gate-card">
         <div class="brand"><div class="brand-mark">D</div><div><strong>Devstich</strong><span>Acesso reservado</span></div></div>
-        <h1>Lista de Presenca</h1>
-        <p>Area privada para registrar participantes, confirmar presenca e exportar a lista quando precisar.</p>
+        <h1>Agenda de Aulas</h1>
+        <p>Area privada para calendario, alunos, horarios de aula e controle de presenca.</p>
         <form id="accessForm">
           <div class="field"><label for="accessLogin">Login</label><input id="accessLogin" name="accessLogin" type="text" autocomplete="username" placeholder="Digite seu login"></div>
           <div class="field"><label for="accessPassword">Senha</label><input id="accessPassword" name="accessPassword" type="password" autocomplete="current-password" placeholder="Digite sua senha"></div>
@@ -91,35 +93,75 @@
 
     <section class="app" id="app">
       <header class="topbar">
-        <div class="brand"><div class="brand-mark">D</div><div><strong>Devstich</strong><span>Lista de presenca</span></div></div>
+        <div class="brand"><div class="brand-mark">D</div><div><strong>Devstich</strong><span>Agenda de aulas</span></div></div>
         <div class="status-pill"><span class="status-dot"></span><span id="todayLabel"></span></div>
       </header>
+
       <section class="hero">
         <div>
-          <h1>Controle de presenca</h1>
-          <p>Registre nomes, empresa ou equipe, status de confirmacao e mantenha tudo salvo neste navegador.</p>
-          <div class="toolbar"><button class="ghost-btn" id="exportBtn" type="button">Exportar CSV</button><button class="danger-btn" id="clearBtn" type="button">Limpar lista</button></div>
+          <h1>Calendario e alunos</h1>
+          <p>Cadastre os alunos uma vez, escolha o dia e o horario. Cada aula ocupa automaticamente 1 hora no calendario.</p>
+          <div class="tabs" role="tablist">
+            <button class="tab-btn active" type="button" data-view="calendarView">Calendario</button>
+            <button class="tab-btn" type="button" data-view="studentsView">Alunos</button>
+            <button class="tab-btn" type="button" data-view="presenceView">Presenca</button>
+          </div>
         </div>
-        <div class="hero-kpis"><div class="kpi"><span>Total</span><strong id="totalCount">0</strong></div><div class="kpi"><span>Presentes</span><strong id="presentCount">0</strong></div><div class="kpi"><span>Pendentes</span><strong id="pendingCount">0</strong></div></div>
+        <div class="hero-kpis">
+          <div class="kpi"><span>Alunos ativos</span><strong id="studentCount">0</strong></div>
+          <div class="kpi"><span>Aulas/semana</span><strong id="lessonCount">0</strong></div>
+          <div class="kpi"><span>Presentes</span><strong id="presentCount">0</strong></div>
+        </div>
       </section>
 
-      <section class="panel" aria-label="Adicionar participante">
-        <div class="panel-head"><h2>Novo registro</h2></div>
-        <form class="form-grid" id="presenceForm">
-          <div class="field"><label for="name">Nome completo</label><input id="name" name="name" type="text" placeholder="Ex.: Ana Silva" required></div>
-          <div class="field"><label for="company">Empresa ou equipe</label><input id="company" name="company" type="text" placeholder="Ex.: Devstich"></div>
-          <div class="field"><label for="status">Status</label><select id="status" name="status"><option value="Presente">Presente</option><option value="Pendente">Pendente</option><option value="Ausente">Ausente</option></select></div>
-          <div class="form-actions"><button class="primary-btn" type="submit">Adicionar</button></div>
-        </form>
+      <section class="view active" id="calendarView">
+        <section class="panel" aria-label="Calendario de aulas">
+          <div class="calendar-tools">
+            <button class="ghost-btn" id="prevMonth" type="button">Mes anterior</button>
+            <h2 class="calendar-title" id="calendarTitle">Calendario</h2>
+            <button class="ghost-btn" id="nextMonth" type="button">Proximo mes</button>
+          </div>
+          <div class="calendar-scroll"><div class="calendar-grid" id="calendarGrid"></div></div>
+        </section>
       </section>
 
-      <section class="panel" aria-label="Registros da lista">
-        <div class="panel-head"><h2>Registros</h2></div>
-        <div class="list-tools"><input id="search" type="search" placeholder="Buscar por nome ou empresa"><select id="filter"><option value="Todos">Todos os status</option><option value="Presente">Presente</option><option value="Pendente">Pendente</option><option value="Ausente">Ausente</option></select></div>
-        <div class="table-wrap">
-          <table><thead><tr><th>Nome</th><th>Empresa/equipe</th><th>Status</th><th>Horario</th><th></th></tr></thead><tbody id="listBody"></tbody></table>
-          <div class="empty" id="emptyState">Nenhum registro ainda.</div>
-        </div>
+      <section class="view" id="studentsView">
+        <section class="panel" aria-label="Cadastrar aluno">
+          <div class="panel-head"><h2>Novo aluno</h2></div>
+          <form class="form-grid" id="studentForm">
+            <div class="field"><label for="studentName">Nome do aluno</label><input id="studentName" name="studentName" type="text" placeholder="Ex.: Ana Silva" required></div>
+            <div class="field"><label for="studentPhone">Telefone</label><input id="studentPhone" name="studentPhone" type="text" placeholder="Opcional"></div>
+            <div class="field"><label for="classDay">Dia da aula</label><select id="classDay" name="classDay"><option value="1">Segunda-feira</option><option value="2">Terca-feira</option><option value="3">Quarta-feira</option><option value="4">Quinta-feira</option><option value="5">Sexta-feira</option><option value="6">Sabado</option><option value="0">Domingo</option></select></div>
+            <div class="field"><label for="classTime">Horario</label><input id="classTime" name="classTime" type="time" required></div>
+            <div class="field" style="grid-column:1 / -1"><label for="studentNotes">Observacoes</label><textarea id="studentNotes" name="studentNotes" placeholder="Opcional"></textarea></div>
+            <div class="form-actions"><button class="primary-btn" type="submit">Cadastrar aluno</button></div>
+          </form>
+        </section>
+
+        <section class="panel" aria-label="Alunos cadastrados">
+          <div class="panel-head"><h2>Alunos cadastrados</h2><span class="student-badge">Aulas de 1 hora</span></div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Aluno</th><th>Telefone</th><th>Dia</th><th>Horario</th><th>Status</th><th></th></tr></thead><tbody id="studentsBody"></tbody></table>
+            <div class="empty" id="studentsEmpty">Nenhum aluno cadastrado ainda.</div>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" id="presenceView">
+        <section class="panel" aria-label="Adicionar participante">
+          <div class="panel-head"><h2>Novo registro de presenca</h2></div>
+          <form class="form-grid presence-grid" id="presenceForm">
+            <div class="field"><label for="name">Nome completo</label><input id="name" name="name" type="text" placeholder="Ex.: Ana Silva" required></div>
+            <div class="field"><label for="company">Empresa ou equipe</label><input id="company" name="company" type="text" placeholder="Ex.: Devstich"></div>
+            <div class="field"><label for="status">Status</label><select id="status" name="status"><option value="Presente">Presente</option><option value="Pendente">Pendente</option><option value="Ausente">Ausente</option></select></div>
+            <div class="form-actions"><button class="primary-btn" type="submit">Adicionar</button><button class="ghost-btn" id="exportBtn" type="button">Exportar CSV</button><button class="danger-btn" id="clearBtn" type="button">Limpar lista</button></div>
+          </form>
+        </section>
+        <section class="panel" aria-label="Registros da lista">
+          <div class="panel-head"><h2>Registros</h2></div>
+          <div class="list-tools"><input id="search" type="search" placeholder="Buscar por nome ou empresa"><select id="filter"><option value="Todos">Todos os status</option><option value="Presente">Presente</option><option value="Pendente">Pendente</option><option value="Ausente">Ausente</option></select></div>
+          <div class="table-wrap"><table><thead><tr><th>Nome</th><th>Empresa/equipe</th><th>Status</th><th>Horario</th><th></th></tr></thead><tbody id="listBody"></tbody></table><div class="empty" id="emptyState">Nenhum registro ainda.</div></div>
+        </section>
       </section>
     </section>
   </main>
@@ -127,170 +169,119 @@
   <script>
     var AUTH_API = "/api/auth.php";
     var PRESENCE_API = "/api/presencas.php";
+    var STUDENTS_API = "/api/alunos.php";
+    var dayNames = ["Domingo", "Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado"];
+    var monthCursor = new Date();
+    monthCursor.setDate(1);
+    var records = [];
+    var students = [];
+
     var gate = document.getElementById("gate");
     var app = document.getElementById("app");
     var accessForm = document.getElementById("accessForm");
     var accessLogin = document.getElementById("accessLogin");
     var accessPassword = document.getElementById("accessPassword");
     var accessError = document.getElementById("accessError");
+    var todayLabel = document.getElementById("todayLabel");
+    var studentCount = document.getElementById("studentCount");
+    var lessonCount = document.getElementById("lessonCount");
+    var presentCount = document.getElementById("presentCount");
+    var calendarTitle = document.getElementById("calendarTitle");
+    var calendarGrid = document.getElementById("calendarGrid");
+    var studentsBody = document.getElementById("studentsBody");
+    var studentsEmpty = document.getElementById("studentsEmpty");
+    var studentForm = document.getElementById("studentForm");
     var presenceForm = document.getElementById("presenceForm");
     var listBody = document.getElementById("listBody");
     var emptyState = document.getElementById("emptyState");
     var search = document.getElementById("search");
     var filter = document.getElementById("filter");
-    var totalCount = document.getElementById("totalCount");
-    var presentCount = document.getElementById("presentCount");
-    var pendingCount = document.getElementById("pendingCount");
-    var todayLabel = document.getElementById("todayLabel");
     var exportBtn = document.getElementById("exportBtn");
     var clearBtn = document.getElementById("clearBtn");
-    var records = [];
-    var formatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    var formatter = new Intl.DateTimeFormat("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
 
-    todayLabel.textContent = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "2-digit", month: "long" }).format(new Date());
-
-    function showMessage(message) {
-      accessError.textContent = message;
-      accessError.style.display = "block";
-    }
+    todayLabel.textContent = new Intl.DateTimeFormat("pt-BR", { weekday:"long", day:"2-digit", month:"long" }).format(new Date());
 
     function requestJson(url, options) {
-      return fetch(url, Object.assign({
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin"
-      }, options || {})).then(function(response) {
+      return fetch(url, Object.assign({ headers:{ "Content-Type":"application/json" }, credentials:"same-origin" }, options || {})).then(function(response) {
         return response.json().then(function(payload) {
           if (!response.ok) throw new Error(payload.error || "Erro ao processar solicitacao.");
           return payload;
         });
       });
     }
+    function escapeHtml(value) { return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll(String.fromCharCode(34),"&quot;").replaceAll(String.fromCharCode(39),"&#039;"); }
+    function addMinutes(time, minutes) { var parts = time.split(":"); var total = Number(parts[0]) * 60 + Number(parts[1]) + minutes; return String(Math.floor(total / 60)).padStart(2,"0") + ":" + String(total % 60).padStart(2,"0"); }
+    function dateKey(date) { return date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2,"0") + "-" + String(date.getDate()).padStart(2,"0"); }
 
-    function loadRecords() {
-      return requestJson(PRESENCE_API).then(function(payload) {
-        records = payload.records || [];
-        render();
-      }).catch(function(error) {
-        records = [];
-        render();
-        alert(error.message);
-      });
+    function showApp() { gate.style.display = "none"; app.style.display = "block"; Promise.all([loadStudents(), loadRecords()]).then(renderAll); }
+    function renderAll() { renderKpis(); renderCalendar(); renderStudents(); renderPresence(); }
+    function renderKpis() { var activeStudents = students.filter(function(student) { return Number(student.isActive) === 1; }); studentCount.textContent = activeStudents.length; lessonCount.textContent = activeStudents.length; presentCount.textContent = records.filter(function(record) { return record.status === "Presente"; }).length; }
+
+    function loadStudents() { return requestJson(STUDENTS_API).then(function(payload) { students = payload.students || []; }); }
+    function loadRecords() { return requestJson(PRESENCE_API).then(function(payload) { records = payload.records || []; }); }
+
+    function renderCalendar() {
+      var title = new Intl.DateTimeFormat("pt-BR", { month:"long", year:"numeric" }).format(monthCursor);
+      calendarTitle.textContent = title.charAt(0).toUpperCase() + title.slice(1);
+      var year = monthCursor.getFullYear();
+      var month = monthCursor.getMonth();
+      var first = new Date(year, month, 1);
+      var start = new Date(first);
+      start.setDate(first.getDate() - first.getDay());
+      var today = dateKey(new Date());
+      var html = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"].map(function(day) { return "<div class=\"weekday\">" + day + "</div>"; }).join("");
+      for (var i = 0; i < 42; i += 1) {
+        var current = new Date(start);
+        current.setDate(start.getDate() + i);
+        var currentKey = dateKey(current);
+        var muted = current.getMonth() === month ? "" : " muted";
+        var isToday = currentKey === today ? " today" : "";
+        var lessons = students.filter(function(student) { return Number(student.isActive) === 1 && Number(student.classDay) === current.getDay(); }).sort(function(a, b) { return a.classTime.localeCompare(b.classTime); });
+        html += "<div class=\"day-cell" + muted + isToday + "\"><div class=\"day-number\">" + current.getDate() + "</div>";
+        html += lessons.map(function(student) { return "<div class=\"lesson\"><strong>" + escapeHtml(student.classTime) + " - " + escapeHtml(addMinutes(student.classTime, 60)) + "</strong><span>" + escapeHtml(student.name) + "</span></div>"; }).join("");
+        html += "</div>";
+      }
+      calendarGrid.innerHTML = html;
     }
 
-    function showApp() {
-      gate.style.display = "none";
-      app.style.display = "block";
-      loadRecords();
-    }
-
-    function escapeHtml(value) {
-      return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll(String.fromCharCode(34), "&quot;").replaceAll(String.fromCharCode(39), "&#039;");
-    }
-
-    function render() {
-      var term = search.value.trim().toLowerCase();
-      var selectedStatus = filter.value;
-      var filtered = records.filter(function(record) {
-        return (record.name + " " + (record.company || "")).toLowerCase().includes(term) && (selectedStatus === "Todos" || record.status === selectedStatus);
-      });
-
-      totalCount.textContent = records.length;
-      presentCount.textContent = records.filter(function(record) { return record.status === "Presente"; }).length;
-      pendingCount.textContent = records.filter(function(record) { return record.status === "Pendente"; }).length;
-      emptyState.style.display = filtered.length ? "none" : "block";
-      listBody.innerHTML = filtered.map(function(record) {
-        return "<tr><td>" + escapeHtml(record.name) + "</td><td>" + escapeHtml(record.company || "-") + "</td><td>" + escapeHtml(record.status) + "</td><td>" + formatter.format(new Date(record.createdAt)) + "</td><td><div class=\"row-actions\"><button class=\"icon-btn\" type=\"button\" title=\"Alternar status\" data-toggle=\"" + record.id + "\">OK</button><button class=\"icon-btn delete\" type=\"button\" title=\"Remover\" data-delete=\"" + record.id + "\">X</button></div></td></tr>";
+    function renderStudents() {
+      studentsEmpty.style.display = students.length ? "none" : "block";
+      studentsBody.innerHTML = students.map(function(student) {
+        var active = Number(student.isActive) === 1;
+        return "<tr><td>" + escapeHtml(student.name) + "</td><td>" + escapeHtml(student.phone || "-") + "</td><td>" + dayNames[Number(student.classDay)] + "</td><td>" + escapeHtml(student.classTime) + " - " + escapeHtml(addMinutes(student.classTime, 60)) + "</td><td>" + (active ? "Ativo" : "Pausado") + "</td><td><div class=\"row-actions\"><button class=\"icon-btn\" type=\"button\" title=\"Pausar/ativar\" data-student-toggle=\"" + student.id + "\">" + (active ? "II" : "OK") + "</button><button class=\"icon-btn delete\" type=\"button\" title=\"Remover\" data-student-delete=\"" + student.id + "\">X</button></div></td></tr>";
       }).join("");
     }
 
-    function downloadCsv() {
-      var header = ["Nome", "Empresa/equipe", "Status", "Horario"];
-      var rows = records.map(function(record) { return [record.name, record.company, record.status, formatter.format(new Date(record.createdAt))]; });
-      var csv = [header].concat(rows).map(function(row) {
-        return row.map(function(cell) {
-          return String.fromCharCode(34) + String(cell || "").replaceAll(String.fromCharCode(34), String.fromCharCode(34) + String.fromCharCode(34)) + String.fromCharCode(34);
-        }).join(";");
-      }).join("\n");
-      var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-      var url = URL.createObjectURL(blob);
-      var link = document.createElement("a");
-      link.href = url;
-      link.download = "lista-de-presenca.csv";
-      link.click();
-      URL.revokeObjectURL(url);
+    function renderPresence() {
+      var term = search.value.trim().toLowerCase();
+      var selectedStatus = filter.value;
+      var filtered = records.filter(function(record) { return (record.name + " " + (record.company || "")).toLowerCase().includes(term) && (selectedStatus === "Todos" || record.status === selectedStatus); });
+      emptyState.style.display = filtered.length ? "none" : "block";
+      listBody.innerHTML = filtered.map(function(record) { return "<tr><td>" + escapeHtml(record.name) + "</td><td>" + escapeHtml(record.company || "-") + "</td><td>" + escapeHtml(record.status) + "</td><td>" + formatter.format(new Date(record.createdAt)) + "</td><td><div class=\"row-actions\"><button class=\"icon-btn\" type=\"button\" title=\"Alternar status\" data-toggle=\"" + record.id + "\">OK</button><button class=\"icon-btn delete\" type=\"button\" title=\"Remover\" data-delete=\"" + record.id + "\">X</button></div></td></tr>"; }).join("");
+      renderKpis();
     }
 
-    accessForm.addEventListener("submit", function(event) {
-      event.preventDefault();
-      requestJson(AUTH_API, {
-        method: "POST",
-        body: JSON.stringify({ username: accessLogin.value.trim(), password: accessPassword.value })
-      }).then(function() {
-        accessError.style.display = "none";
-        showApp();
-      }).catch(function(error) {
-        showMessage(error.message);
-        accessPassword.select();
-      });
-    });
+    document.querySelectorAll(".tab-btn").forEach(function(button) { button.addEventListener("click", function() { document.querySelectorAll(".tab-btn").forEach(function(item) { item.classList.remove("active"); }); document.querySelectorAll(".view").forEach(function(item) { item.classList.remove("active"); }); button.classList.add("active"); document.getElementById(button.dataset.view).classList.add("active"); }); });
+    document.getElementById("prevMonth").addEventListener("click", function() { monthCursor.setMonth(monthCursor.getMonth() - 1); renderCalendar(); });
+    document.getElementById("nextMonth").addEventListener("click", function() { monthCursor.setMonth(monthCursor.getMonth() + 1); renderCalendar(); });
 
-    presenceForm.addEventListener("submit", function(event) {
-      event.preventDefault();
-      var form = new FormData(presenceForm);
-      requestJson(PRESENCE_API, {
-        method: "POST",
-        body: JSON.stringify({
-          name: form.get("name").trim(),
-          company: form.get("company").trim(),
-          status: form.get("status")
-        })
-      }).then(function() {
-        presenceForm.reset();
-        document.getElementById("status").value = "Presente";
-        loadRecords();
-      }).catch(function(error) {
-        alert(error.message);
-      });
-    });
+    accessForm.addEventListener("submit", function(event) { event.preventDefault(); requestJson(AUTH_API, { method:"POST", body:JSON.stringify({ username:accessLogin.value.trim(), password:accessPassword.value }) }).then(function() { accessError.style.display = "none"; showApp(); }).catch(function(error) { accessError.textContent = error.message; accessError.style.display = "block"; accessPassword.select(); }); });
 
-    listBody.addEventListener("click", function(event) {
-      var toggleId = event.target.dataset.toggle;
-      var deleteId = event.target.dataset.delete;
+    studentForm.addEventListener("submit", function(event) { event.preventDefault(); var form = new FormData(studentForm); requestJson(STUDENTS_API, { method:"POST", body:JSON.stringify({ name:form.get("studentName").trim(), phone:form.get("studentPhone").trim(), classDay:form.get("classDay"), classTime:form.get("classTime"), notes:form.get("studentNotes").trim() }) }).then(function() { studentForm.reset(); return loadStudents(); }).then(renderAll).catch(function(error) { alert(error.message); }); });
 
-      if (toggleId) {
-        var current = records.find(function(record) { return String(record.id) === String(toggleId); });
-        var nextStatus = current && current.status === "Presente" ? "Pendente" : "Presente";
-        requestJson(PRESENCE_API, {
-          method: "PATCH",
-          body: JSON.stringify({ id: toggleId, status: nextStatus })
-        }).then(loadRecords).catch(function(error) { alert(error.message); });
-      }
+    studentsBody.addEventListener("click", function(event) { var toggleId = event.target.dataset.studentToggle; var deleteId = event.target.dataset.studentDelete; if (toggleId) { var student = students.find(function(item) { return String(item.id) === String(toggleId); }); requestJson(STUDENTS_API, { method:"PATCH", body:JSON.stringify({ id:toggleId, isActive: student && Number(student.isActive) === 1 ? 0 : 1 }) }).then(loadStudents).then(renderAll).catch(function(error) { alert(error.message); }); } if (deleteId && confirm("Deseja remover este aluno?")) { requestJson(STUDENTS_API, { method:"DELETE", body:JSON.stringify({ id:deleteId }) }).then(loadStudents).then(renderAll).catch(function(error) { alert(error.message); }); } });
 
-      if (deleteId) {
-        requestJson(PRESENCE_API, {
-          method: "DELETE",
-          body: JSON.stringify({ id: deleteId })
-        }).then(loadRecords).catch(function(error) { alert(error.message); });
-      }
-    });
+    presenceForm.addEventListener("submit", function(event) { event.preventDefault(); var form = new FormData(presenceForm); requestJson(PRESENCE_API, { method:"POST", body:JSON.stringify({ name:form.get("name").trim(), company:form.get("company").trim(), status:form.get("status") }) }).then(function() { presenceForm.reset(); document.getElementById("status").value = "Presente"; return loadRecords(); }).then(renderAll).catch(function(error) { alert(error.message); }); });
 
-    search.addEventListener("input", render);
-    filter.addEventListener("change", render);
-    exportBtn.addEventListener("click", downloadCsv);
-    clearBtn.addEventListener("click", function() {
-      if (!records.length || !confirm("Deseja apagar todos os registros?")) return;
-      requestJson(PRESENCE_API, {
-        method: "DELETE",
-        body: JSON.stringify({})
-      }).then(loadRecords).catch(function(error) { alert(error.message); });
-    });
+    listBody.addEventListener("click", function(event) { var toggleId = event.target.dataset.toggle; var deleteId = event.target.dataset.delete; if (toggleId) { var current = records.find(function(record) { return String(record.id) === String(toggleId); }); var nextStatus = current && current.status === "Presente" ? "Pendente" : "Presente"; requestJson(PRESENCE_API, { method:"PATCH", body:JSON.stringify({ id:toggleId, status:nextStatus }) }).then(loadRecords).then(renderAll).catch(function(error) { alert(error.message); }); } if (deleteId) { requestJson(PRESENCE_API, { method:"DELETE", body:JSON.stringify({ id:deleteId }) }).then(loadRecords).then(renderAll).catch(function(error) { alert(error.message); }); } });
 
-    requestJson(AUTH_API).then(function(payload) {
-      if (payload.authenticated) showApp();
-    }).catch(function() {});
+    search.addEventListener("input", renderPresence);
+    filter.addEventListener("change", renderPresence);
+    exportBtn.addEventListener("click", function() { var header = ["Nome", "Empresa/equipe", "Status", "Horario"]; var rows = records.map(function(record) { return [record.name, record.company, record.status, formatter.format(new Date(record.createdAt))]; }); var csv = [header].concat(rows).map(function(row) { return row.map(function(cell) { return String.fromCharCode(34) + String(cell || "").replaceAll(String.fromCharCode(34), String.fromCharCode(34) + String.fromCharCode(34)) + String.fromCharCode(34); }).join(";"); }).join("\n"); var blob = new Blob([csv], { type:"text/csv;charset=utf-8" }); var url = URL.createObjectURL(blob); var link = document.createElement("a"); link.href = url; link.download = "lista-de-presenca.csv"; link.click(); URL.revokeObjectURL(url); });
+    clearBtn.addEventListener("click", function() { if (!records.length || !confirm("Deseja apagar todos os registros?")) return; requestJson(PRESENCE_API, { method:"DELETE", body:JSON.stringify({}) }).then(loadRecords).then(renderAll).catch(function(error) { alert(error.message); }); });
+
+    requestJson(AUTH_API).then(function(payload) { if (payload.authenticated) showApp(); }).catch(function() {});
   </script>
 </body>
 </html>
-
-
-
