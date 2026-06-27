@@ -1,12 +1,24 @@
 <?php
 declare(strict_types=1);
 
-$configPath = __DIR__ . '/config.php';
+$configPaths = [
+    dirname(__DIR__, 2) . '/config.php',
+    __DIR__ . '/config.php',
+];
 
-if (!file_exists($configPath)) {
+$configPath = null;
+
+foreach ($configPaths as $path) {
+    if (file_exists($path)) {
+        $configPath = $path;
+        break;
+    }
+}
+
+if ($configPath === null) {
     http_response_code(500);
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['error' => 'Arquivo api/config.php nao configurado.']);
+    echo json_encode(['error' => 'Arquivo config.php nao configurado fora do public_html.']);
     exit;
 }
 
