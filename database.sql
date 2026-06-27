@@ -34,6 +34,20 @@ CREATE TABLE IF NOT EXISTS alunos (
   INDEX idx_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+CREATE TABLE IF NOT EXISTS chamadas (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  student_id INT UNSIGNED NOT NULL,
+  attendance_date DATE NOT NULL,
+  status ENUM('Presente', 'Pendente', 'Ausente') NOT NULL DEFAULT 'Pendente',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uniq_student_date (student_id, attendance_date),
+  INDEX idx_attendance_date (attendance_date),
+  CONSTRAINT fk_chamadas_student FOREIGN KEY (student_id) REFERENCES alunos(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT INTO access_users (username, password_hash, is_active)
 SELECT 'Matheus.dias', 'ce79148500525a61846e79dddcee0cb5cc9db11f41a499fde5ae34379872ade1', 1
 WHERE NOT EXISTS (SELECT 1 FROM access_users WHERE username = 'Matheus.dias');
+
