@@ -9,6 +9,9 @@ RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /([^.]+)\.html[\s?] [NC]
 RewriteRule ^ /%1 [R=301,L]
 
 # Internamente, serve o .html quando a URL não tem extensão
+RewriteRule ^listadepresenca/?$ lista\ de\ presenca.html [L]
+
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.html -f
 RewriteRule ^([^.]+)$ $1.html [L]
+
