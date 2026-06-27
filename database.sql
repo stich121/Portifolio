@@ -2,11 +2,28 @@ CREATE TABLE IF NOT EXISTS access_users (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   username VARCHAR(80) NOT NULL,
   password_hash CHAR(64) NOT NULL,
+  access_level TINYINT UNSIGNED NOT NULL DEFAULT 1,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uniq_username (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+SET @access_level_exists := (
+  SELECT COUNT(*)
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'access_users'
+    AND COLUMN_NAME = 'access_level'
+);
+SET @access_level_sql := IF(
+  @access_level_exists = 0,
+  'ALTER TABLE access_users ADD COLUMN access_level TINYINT UNSIGNED NOT NULL DEFAULT 1 AFTER password_hash',
+  'SELECT 1'
+);
+PREPARE access_level_stmt FROM @access_level_sql;
+EXECUTE access_level_stmt;
+DEALLOCATE PREPARE access_level_stmt;
 
 CREATE TABLE IF NOT EXISTS presencas (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -34,7 +51,6 @@ CREATE TABLE IF NOT EXISTS alunos (
   INDEX idx_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 CREATE TABLE IF NOT EXISTS chamadas (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   student_id INT UNSIGNED NOT NULL,
@@ -47,7 +63,17 @@ CREATE TABLE IF NOT EXISTS chamadas (
   INDEX idx_attendance_date (attendance_date),
   CONSTRAINT fk_chamadas_student FOREIGN KEY (student_id) REFERENCES alunos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-INSERT INTO access_users (username, password_hash, is_active)
-SELECT 'Matheus.dias', 'ce79148500525a61846e79dddcee0cb5cc9db11f41a499fde5ae34379872ade1', 1
+
+INSERT INTO access_users (username, password_hash, access_level, is_active)
+SELECT 'Matheus.dias', 'ce79148500525a61846e79dddcee0cb5cc9db11f41a499fde5ae34379872ade1', 3, 1
 WHERE NOT EXISTS (SELECT 1 FROM access_users WHERE username = 'Matheus.dias');
 
+UPDATE access_users
+SET access_level = CASE
+  WHEN access_level BETWEEN 1 AND 3 THEN access_level
+  ELSE 1
+END;
+
+UPDATE access_users
+SET access_level = 3
+WHERE username = 'Matheus.dias';

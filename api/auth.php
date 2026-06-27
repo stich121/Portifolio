@@ -7,7 +7,10 @@ require_once __DIR__ . '/db.php';
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
 if ($method === 'GET') {
-    json_response(['authenticated' => !empty($_SESSION['presence_authenticated'])]);
+    json_response([
+        'authenticated' => !empty($_SESSION['presence_authenticated']),
+        'teacher' => $_SESSION['teacher'] ?? null,
+    ]);
 }
 
 if ($method === 'DELETE') {
@@ -29,7 +32,7 @@ if ($username === '' || $password === '') {
 }
 
 $stmt = db()->prepare(
-    'SELECT password_hash
+    'SELECT id, username, password_hash, access_level
      FROM access_users
      WHERE username = :username AND is_active = 1
      LIMIT 1'
@@ -41,5 +44,16 @@ if (!$row || !hash_equals((string)$row['password_hash'], hash('sha256', $passwor
     json_response(['error' => 'Login ou senha incorretos.'], 401);
 }
 
+$level = (int)$row['access_level'];
+if ($level < 1 || $level > 3) {
+    $level = 1;
+}
+
 $_SESSION['presence_authenticated'] = true;
-json_response(['ok' => true]);
+$_SESSION['teacher'] = [
+    'id' => (int)$row['id'],
+    'username' => (string)$row['username'],
+    'accessLevel' => $level,
+];
+
+json_response(['ok' => true, 'teacher' => $_SESSION['teacher']]);
