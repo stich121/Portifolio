@@ -44,7 +44,11 @@
     .app,.view { display:none; }
     .view.active { display:block; }
     .tab-btn.active { background:var(--brand); color:#07110f; border-color:transparent; }
-    .hero { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr); gap:24px; align-items:end; padding:30px 0 20px; }
+    .hero { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr); gap:24px; align-items:stretch; padding:30px 0 20px; }
+    .hero-side { display:flex; flex-direction:column; justify-content:space-between; gap:16px; }
+    .teacher-card { border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.06); padding:16px; }
+    .teacher-card span { color:var(--muted); font-size:.86rem; font-weight:700; }
+    .teacher-card strong { display:block; margin-top:8px; font-size:1.3rem; }
     .hero-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
     .kpi { min-height:104px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.06); padding:16px; }
     .kpi span { color:var(--muted); font-size:.86rem; font-weight:700; }
@@ -170,10 +174,16 @@
             <select id="teacherScopeSelect"></select>
           </div>
         </div>
-        <div class="hero-kpis">
-          <div class="kpi"><span>Alunos ativos</span><strong id="studentCount">0</strong></div>
-          <div class="kpi"><span>Aulas/semana</span><strong id="lessonCount">0</strong></div>
-          <div class="kpi"><span>Presentes</span><strong id="presentCount">0</strong></div>
+        <div class="hero-side">
+          <div class="teacher-card">
+            <span>Professor</span>
+            <strong id="teacherCardName">-</strong>
+          </div>
+          <div class="hero-kpis">
+            <div class="kpi"><span>Alunos ativos</span><strong id="studentCount">0</strong></div>
+            <div class="kpi"><span>Aulas/semana</span><strong id="lessonCount">0</strong></div>
+            <div class="kpi"><span>Presentes</span><strong id="presentCount">0</strong></div>
+          </div>
         </div>
       </section>
 
@@ -325,6 +335,7 @@
     var togglePassword = document.getElementById("togglePassword");
     var accessError = document.getElementById("accessError");
     var todayLabel = document.getElementById("todayLabel");
+    var teacherCardName = document.getElementById("teacherCardName");
     var studentCount = document.getElementById("studentCount");
     var lessonCount = document.getElementById("lessonCount");
     var presentCount = document.getElementById("presentCount");
@@ -401,6 +412,8 @@
       var teacher = teachers.find(function(item) { return Number(item.id) === Number(id); });
       return teacher ? teacher.username : (currentTeacher ? currentTeacher.username : "Professor");
     }
+    function formatTeacherName(name) { return String(name || "").replaceAll(".", " "); }
+    function renderTeacherCard() { teacherCardName.textContent = formatTeacherName(selectedTeacherName()); }
     function renderTeacherScope() {
       if (!teacherScope || !teacherScopeSelect) return;
       if (!canManageTeachers()) {
@@ -423,7 +436,7 @@
       var setup = canManageTeachers() ? loadTeachers().then(renderTeacherScope) : Promise.resolve(renderTeacherScope());
       setup.then(function() { return Promise.all([loadStudents(), loadRecords(), loadCalendarRecords(), loadPendingReplacements()]); }).then(renderAll).catch(function(error) { alert(error.message); });
     }
-    function renderAll() { renderKpis(); renderCalendar(); renderStudents(); renderPresence(); renderTeachers(); renderPendingList(); }
+    function renderAll() { renderKpis(); renderCalendar(); renderStudents(); renderPresence(); renderTeachers(); renderPendingList(); renderTeacherCard(); }
     function renderKpis() { var activeStudents = students.filter(function(student) { return Number(student.isActive) === 1; }); studentCount.textContent = activeStudents.length; lessonCount.textContent = activeStudents.length; presentCount.textContent = records.filter(function(record) { return record.status === "Presente"; }).length; }
 
     function loadStudents() { return requestJson(STUDENTS_API + "?teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { students = payload.students || []; }); }
