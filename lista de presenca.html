@@ -195,11 +195,16 @@
         <section class="panel" aria-label="Lista de presenca dos alunos">
           <div class="panel-head"><h2 id="attendanceTitle">Lista de presenca</h2><span class="student-badge">Alunos ativos cadastrados</span></div>
           <div class="attendance-tools">
-            <div class="field"><label for="attendanceDate">Data da chamada</label><input id="attendanceDate" type="date"></div>
+            <div class="status-buttons" id="attendanceModeButtons">
+              <button class="status-btn active" type="button" data-attendance-mode="day">Dia</button>
+              <button class="status-btn" type="button" data-attendance-mode="month">Mes</button>
+            </div>
+            <div class="field" id="attendanceDayField"><label for="attendanceDate">Data da chamada</label><input id="attendanceDate" type="date"></div>
+            <div class="field" id="attendanceMonthField" hidden><label for="attendanceMonth">Mes</label><input id="attendanceMonth" type="month"></div>
             <span class="student-badge" id="attendanceSummary">0 presentes</span>
           </div>
           <div class="table-wrap">
-            <table><thead><tr><th>Aluno</th><th>Dia da aula</th><th>Horario</th><th>Status</th></tr></thead><tbody id="attendanceBody"></tbody></table>
+            <table><thead><tr><th>Data</th><th>Aluno</th><th>Dia da aula</th><th>Horario</th><th>Status</th></tr></thead><tbody id="attendanceBody"></tbody></table>
             <div class="empty" id="attendanceEmpty">Nenhum aluno ativo cadastrado ainda.</div>
           </div>
         </section>
@@ -301,6 +306,11 @@
     var studentsEmpty = document.getElementById("studentsEmpty");
     var studentForm = document.getElementById("studentForm");
     var attendanceDate = document.getElementById("attendanceDate");
+    var attendanceMonth = document.getElementById("attendanceMonth");
+    var attendanceModeButtons = document.getElementById("attendanceModeButtons");
+    var attendanceDayField = document.getElementById("attendanceDayField");
+    var attendanceMonthField = document.getElementById("attendanceMonthField");
+    var attendanceMode = "day";
     var attendanceBody = document.getElementById("attendanceBody");
     var attendanceEmpty = document.getElementById("attendanceEmpty");
     var attendanceSummary = document.getElementById("attendanceSummary");
@@ -336,6 +346,7 @@
 
     todayLabel.textContent = new Intl.DateTimeFormat("pt-BR", { weekday:"long", day:"2-digit", month:"long" }).format(new Date());
     attendanceDate.value = dateKey(new Date());
+    attendanceMonth.value = monthKey(new Date());
 
     function requestJson(url, options) {
       return fetch(url, Object.assign({ headers:{ "Content-Type":"application/json" }, credentials:"same-origin" }, options || {})).then(function(response) {
@@ -348,6 +359,7 @@
     function escapeHtml(value) { return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll(String.fromCharCode(34),"&quot;").replaceAll(String.fromCharCode(39),"&#039;"); }
     function addMinutes(time, minutes) { var parts = time.split(":"); var total = Number(parts[0]) * 60 + Number(parts[1]) + minutes; return String(Math.floor(total / 60)).padStart(2,"0") + ":" + String(total % 60).padStart(2,"0"); }
     function dateKey(date) { return date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2,"0") + "-" + String(date.getDate()).padStart(2,"0"); }
+    function monthKey(date) { return date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2,"0"); }
     function calendarRange() { var first = new Date(monthCursor.getFullYear(), monthCursor.getMonth(), 1); var start = new Date(first); start.setDate(first.getDate() - first.getDay()); var end = new Date(start); end.setDate(start.getDate() + 41); return { start:dateKey(start), end:dateKey(end) }; }
     function calendarRecord(studentId, date) { return calendarRecords.find(function(record) { return Number(record.studentId) === Number(studentId) && record.attendanceDate === date; }); }
     function calendarStatus(studentId, date) { var found = calendarRecord(studentId, date); return found ? found.status : "Pendente"; }
@@ -385,7 +397,12 @@
     function renderKpis() { var activeStudents = students.filter(function(student) { return Number(student.isActive) === 1; }); studentCount.textContent = activeStudents.length; lessonCount.textContent = activeStudents.length; presentCount.textContent = records.filter(function(record) { return record.status === "Presente"; }).length; }
 
     function loadStudents() { return requestJson(STUDENTS_API + "?teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { students = payload.students || []; }); }
-    function loadRecords() { return requestJson(ATTENDANCE_API + "?date=" + encodeURIComponent(attendanceDate.value) + "&teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { records = payload.records || []; }); }
+    function loadRecords() {
+      if (attendanceMode === "month") {
+        return requestJson(ATTENDANCE_API + "?month=" + encodeURIComponent(attendanceMonth.value) + "&teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { records = payload.records || []; });
+      }
+      return requestJson(ATTENDANCE_API + "?date=" + encodeURIComponent(attendanceDate.value) + "&teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { records = payload.records || []; });
+    }
     function loadCalendarRecords() { var range = calendarRange(); return requestJson(ATTENDANCE_API + "?start=" + encodeURIComponent(range.start) + "&end=" + encodeURIComponent(range.end) + "&teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { calendarRecords = payload.records || []; }); }
     function loadPendingReplacements() { return requestJson(ATTENDANCE_API + "?pendingReplacements=1&teacherId=" + encodeURIComponent(activeTeacherId())).then(function(payload) { pendingReplacements = payload.records || []; }); }
     function canManageTeachers() { return currentTeacher && Number(currentTeacher.accessLevel) === 3; }
@@ -427,10 +444,10 @@
     function renderPresence() {
       attendanceTitle.textContent = "Lista de presenca - " + selectedTeacherName();
       var present = records.filter(function(record) { return record.status === "Presente"; }).length;
-      attendanceSummary.textContent = present + " presentes de " + records.length + " alunos";
+      attendanceSummary.textContent = present + " presentes de " + records.length + " aulas";
       attendanceEmpty.style.display = records.length ? "none" : "block";
       attendanceBody.innerHTML = records.map(function(record) {
-        return "<tr><td>" + escapeHtml(record.name) + "</td><td>" + dayNames[Number(record.classDay)] + "</td><td>" + escapeHtml(record.classTime) + " - " + escapeHtml(addMinutes(record.classTime, 60)) + "</td><td><div class=\"status-buttons\"><button class=\"status-btn " + (record.status === "Presente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-status=\"Presente\">Presente</button><button class=\"status-btn pending " + (record.status === "Pendente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-status=\"Pendente\">Pendente</button><button class=\"status-btn absent " + (record.status === "Ausente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-status=\"Ausente\">Ausente</button><button class=\"status-btn pending " + (record.status === "Reposicao" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-status=\"Reposicao\">Reposicao</button></div></td></tr>";
+        return "<tr><td>" + formatDateLabel(record.attendanceDate) + "</td><td>" + escapeHtml(record.name) + "</td><td>" + dayNames[Number(record.classDay)] + "</td><td>" + escapeHtml(record.classTime) + " - " + escapeHtml(addMinutes(record.classTime, 60)) + "</td><td><div class=\"status-buttons\"><button class=\"status-btn " + (record.status === "Presente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Presente\">Presente</button><button class=\"status-btn pending " + (record.status === "Pendente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Pendente\">Pendente</button><button class=\"status-btn absent " + (record.status === "Ausente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Ausente\">Ausente</button><button class=\"status-btn pending " + (record.status === "Reposicao" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Reposicao\">Reposicao</button></div></td></tr>";
       }).join("");
       renderKpis();
     }
@@ -503,8 +520,7 @@
 
     function saveLessonStatus(studentId, date, status, dateReplacement, timeReplacement) {
       return requestJson(ATTENDANCE_API, { method:"POST", body:JSON.stringify({ studentId:studentId, teacherId:activeTeacherId(), date:date, status:status, replacementDate:dateReplacement || "", replacementTime:timeReplacement || "" }) }).then(function() {
-        if (attendanceDate.value === date) return Promise.all([loadRecords(), loadCalendarRecords()]);
-        return loadCalendarRecords();
+        return Promise.all([loadRecords(), loadCalendarRecords(), loadPendingReplacements()]);
       }).then(renderAll);
     }
 
@@ -593,6 +609,16 @@
 
     teacherScopeSelect.addEventListener("change", function() { selectedTeacherId = Number(teacherScopeSelect.value); Promise.all([loadStudents(), loadRecords(), loadCalendarRecords(), loadPendingReplacements()]).then(renderAll).catch(function(error) { alert(error.message); }); });
     attendanceDate.addEventListener("change", function() { Promise.all([loadRecords(), loadCalendarRecords()]).then(renderAll).catch(function(error) { alert(error.message); }); });
+    attendanceMonth.addEventListener("change", function() { loadRecords().then(renderAll).catch(function(error) { alert(error.message); }); });
+    attendanceModeButtons.addEventListener("click", function(event) {
+      var mode = event.target.dataset.attendanceMode;
+      if (!mode || mode === attendanceMode) return;
+      attendanceMode = mode;
+      attendanceModeButtons.querySelectorAll(".status-btn").forEach(function(btn) { btn.classList.toggle("active", btn.dataset.attendanceMode === mode); });
+      attendanceDayField.hidden = mode !== "day";
+      attendanceMonthField.hidden = mode !== "month";
+      loadRecords().then(renderAll).catch(function(error) { alert(error.message); });
+    });
     teacherForm.addEventListener("submit", function(event) {
       event.preventDefault();
       if (!canManageTeachers()) return;
@@ -610,8 +636,9 @@
     attendanceBody.addEventListener("click", function(event) {
       var studentId = event.target.dataset.attendanceStudent;
       var status = event.target.dataset.attendanceStatus;
-      if (!studentId || !status) return;
-      requestJson(ATTENDANCE_API, { method:"POST", body:JSON.stringify({ studentId:studentId, teacherId:activeTeacherId(), date:attendanceDate.value, status:status }) }).then(function() { return Promise.all([loadRecords(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); });
+      var date = event.target.dataset.attendanceDate;
+      if (!studentId || !status || !date) return;
+      saveLessonStatus(studentId, date, status, "", "").catch(function(error) { alert(error.message); });
     });
 
     requestJson(AUTH_API).then(function(payload) { if (payload.authenticated) { currentTeacher = payload.teacher || null; showApp(); } }).catch(function() {});

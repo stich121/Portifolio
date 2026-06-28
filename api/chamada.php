@@ -39,6 +39,84 @@ if ($method === 'GET') {
         json_response(['teacherId' => $teacherId, 'records' => $stmt->fetchAll()]);
     }
 
+    $month = trim((string)($_GET['month'] ?? ''));
+
+    if ($month !== '') {
+        if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
+            json_response(['error' => 'Mes invalido.'], 422);
+        }
+
+        $monthStart = $month . '-01';
+        $monthEnd = date('Y-m-t', strtotime($monthStart));
+
+        $studentsStmt = $pdo->prepare(
+            'SELECT alunos.id AS studentId, alunos.name, alunos.phone,
+                    alunos.class_day AS classDay,
+                    TIME_FORMAT(alunos.class_time, "%H:%i") AS classTime
+             FROM alunos
+             WHERE alunos.is_active = 1 AND alunos.teacher_id = :teacher_id
+             ORDER BY alunos.class_day ASC, alunos.class_time ASC, alunos.name ASC'
+        );
+        $studentsStmt->execute([':teacher_id' => $teacherId]);
+        $studentsList = $studentsStmt->fetchAll();
+
+        $chamadasStmt = $pdo->prepare(
+            'SELECT chamadas.student_id AS studentId, chamadas.attendance_date AS attendanceDate,
+                    chamadas.status,
+                    chamadas.replacement_date AS replacementDate,
+                    TIME_FORMAT(chamadas.replacement_time, "%H:%i") AS replacementTime,
+                    chamadas.id AS attendanceId
+             FROM chamadas
+             INNER JOIN alunos ON alunos.id = chamadas.student_id
+             WHERE alunos.teacher_id = :teacher_id
+               AND chamadas.attendance_date BETWEEN :start_date AND :end_date'
+        );
+        $chamadasStmt->execute([
+            ':teacher_id' => $teacherId,
+            ':start_date' => $monthStart,
+            ':end_date' => $monthEnd,
+        ]);
+
+        $chamadaMap = [];
+        foreach ($chamadasStmt->fetchAll() as $row) {
+            $chamadaMap[$row['studentId'] . '_' . $row['attendanceDate']] = $row;
+        }
+
+        $records = [];
+        $cursor = new DateTime($monthStart);
+        $lastDay = new DateTime($monthEnd);
+
+        while ($cursor <= $lastDay) {
+            $dateValue = $cursor->format('Y-m-d');
+            $weekday = (int)$cursor->format('w');
+
+            foreach ($studentsList as $student) {
+                if ((int)$student['classDay'] !== $weekday) {
+                    continue;
+                }
+
+                $chamada = $chamadaMap[$student['studentId'] . '_' . $dateValue] ?? null;
+
+                $records[] = [
+                    'studentId' => $student['studentId'],
+                    'name' => $student['name'],
+                    'phone' => $student['phone'],
+                    'classDay' => $student['classDay'],
+                    'classTime' => $student['classTime'],
+                    'attendanceDate' => $dateValue,
+                    'status' => $chamada['status'] ?? 'Pendente',
+                    'replacementDate' => $chamada['replacementDate'] ?? null,
+                    'replacementTime' => $chamada['replacementTime'] ?? null,
+                    'attendanceId' => $chamada['attendanceId'] ?? null,
+                ];
+            }
+
+            $cursor->modify('+1 day');
+        }
+
+        json_response(['month' => $month, 'teacherId' => $teacherId, 'records' => $records]);
+    }
+
     $start = trim((string)($_GET['start'] ?? ''));
     $end = trim((string)($_GET['end'] ?? ''));
 
