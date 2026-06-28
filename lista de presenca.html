@@ -311,6 +311,25 @@
       </div>
     </section>
   </div>
+
+  <div class="modal-backdrop" id="studentEditModal" hidden>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="studentEditTitle">
+      <h2 id="studentEditTitle">Editar aluno</h2>
+      <form id="studentEditForm">
+        <div class="modal-grid">
+          <div class="field" style="grid-column:1 / -1"><label for="studentEditName">Nome do aluno</label><input id="studentEditName" type="text" required></div>
+          <div class="field" style="grid-column:1 / -1"><label for="studentEditPhone">Telefone</label><input id="studentEditPhone" type="text" placeholder="Opcional"></div>
+          <div class="field"><label for="studentEditDay">Dia da aula</label><select id="studentEditDay"><option value="1">Segunda-feira</option><option value="2">Terca-feira</option><option value="3">Quarta-feira</option><option value="4">Quinta-feira</option><option value="5">Sexta-feira</option><option value="6">Sabado</option><option value="0">Domingo</option></select></div>
+          <div class="field"><label for="studentEditTime">Horario</label><input id="studentEditTime" type="time" required></div>
+          <div class="field" style="grid-column:1 / -1"><label for="studentEditNotes">Observacoes</label><textarea id="studentEditNotes" placeholder="Opcional"></textarea></div>
+        </div>
+        <div class="modal-actions">
+          <button class="primary-btn" type="submit">Salvar alteracoes</button>
+          <button class="ghost-btn" id="studentEditCancel" type="button">Cancelar</button>
+        </div>
+      </form>
+    </section>
+  </div>
   <script>
     var AUTH_API = "/api/auth.php";
     var ATTENDANCE_API = "/api/chamada.php";
@@ -382,6 +401,15 @@
     var pendingModalSubtitle = document.getElementById("pendingModalSubtitle");
     var pendingModalList = document.getElementById("pendingModalList");
     var pendingModalClose = document.getElementById("pendingModalClose");
+    var studentEditModal = document.getElementById("studentEditModal");
+    var studentEditForm = document.getElementById("studentEditForm");
+    var studentEditName = document.getElementById("studentEditName");
+    var studentEditPhone = document.getElementById("studentEditPhone");
+    var studentEditDay = document.getElementById("studentEditDay");
+    var studentEditTime = document.getElementById("studentEditTime");
+    var studentEditNotes = document.getElementById("studentEditNotes");
+    var studentEditCancel = document.getElementById("studentEditCancel");
+    var editingStudentId = null;
     var pendingLesson = null;
     var formatter = new Intl.DateTimeFormat("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
 
@@ -478,9 +506,10 @@
 
     function renderStudents() {
       studentsEmpty.style.display = students.length ? "none" : "block";
+      var canEdit = canManageTeachers();
       studentsBody.innerHTML = students.map(function(student) {
         var active = Number(student.isActive) === 1;
-        return "<tr><td>" + escapeHtml(student.name) + "</td><td>" + escapeHtml(student.phone || "-") + "</td><td>" + dayNames[Number(student.classDay)] + "</td><td>" + escapeHtml(student.classTime) + " - " + escapeHtml(addMinutes(student.classTime, 60)) + "</td><td>" + (active ? "Ativo" : "Pausado") + "</td><td><div class=\"row-actions\"><button class=\"icon-btn\" type=\"button\" title=\"Pausar/ativar\" data-student-toggle=\"" + student.id + "\">" + (active ? "II" : "OK") + "</button><button class=\"icon-btn delete\" type=\"button\" title=\"Remover\" data-student-delete=\"" + student.id + "\">X</button></div></td></tr>";
+        return "<tr><td>" + escapeHtml(student.name) + "</td><td>" + escapeHtml(student.phone || "-") + "</td><td>" + dayNames[Number(student.classDay)] + "</td><td>" + escapeHtml(student.classTime) + " - " + escapeHtml(addMinutes(student.classTime, 60)) + "</td><td>" + (active ? "Ativo" : "Pausado") + "</td><td><div class=\"row-actions\">" + (canEdit ? "<button class=\"icon-btn\" type=\"button\" title=\"Editar\" data-student-edit=\"" + student.id + "\">E</button>" : "") + "<button class=\"icon-btn\" type=\"button\" title=\"Pausar/ativar\" data-student-toggle=\"" + student.id + "\">" + (active ? "II" : "OK") + "</button><button class=\"icon-btn delete\" type=\"button\" title=\"Remover\" data-student-delete=\"" + student.id + "\">X</button></div></td></tr>";
       }).join("");
     }
 
@@ -648,7 +677,48 @@
 
     studentForm.addEventListener("submit", function(event) { event.preventDefault(); var form = new FormData(studentForm); requestJson(STUDENTS_API, { method:"POST", body:JSON.stringify({ teacherId:activeTeacherId(), name:form.get("studentName").trim(), phone:form.get("studentPhone").trim(), classDay:form.get("classDay"), classTime:form.get("classTime"), notes:form.get("studentNotes").trim() }) }).then(function() { studentForm.reset(); return Promise.all([loadStudents(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); }); });
 
-    studentsBody.addEventListener("click", function(event) { var toggleId = event.target.dataset.studentToggle; var deleteId = event.target.dataset.studentDelete; if (toggleId) { var student = students.find(function(item) { return String(item.id) === String(toggleId); }); requestJson(STUDENTS_API, { method:"PATCH", body:JSON.stringify({ id:toggleId, teacherId:activeTeacherId(), isActive: student && Number(student.isActive) === 1 ? 0 : 1 }) }).then(function() { return Promise.all([loadStudents(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); }); } if (deleteId && confirm("Deseja remover este aluno?")) { requestJson(STUDENTS_API, { method:"DELETE", body:JSON.stringify({ id:deleteId, teacherId:activeTeacherId() }) }).then(function() { return Promise.all([loadStudents(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); }); } });
+    studentsBody.addEventListener("click", function(event) {
+      var toggleId = event.target.dataset.studentToggle;
+      var deleteId = event.target.dataset.studentDelete;
+      var editId = event.target.dataset.studentEdit;
+      if (editId) { openStudentEditModal(editId); }
+      if (toggleId) { var student = students.find(function(item) { return String(item.id) === String(toggleId); }); requestJson(STUDENTS_API, { method:"PATCH", body:JSON.stringify({ id:toggleId, teacherId:activeTeacherId(), isActive: student && Number(student.isActive) === 1 ? 0 : 1 }) }).then(function() { return Promise.all([loadStudents(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); }); }
+      if (deleteId && confirm("Deseja remover este aluno?")) { requestJson(STUDENTS_API, { method:"DELETE", body:JSON.stringify({ id:deleteId, teacherId:activeTeacherId() }) }).then(function() { return Promise.all([loadStudents(), loadCalendarRecords()]); }).then(renderAll).catch(function(error) { alert(error.message); }); }
+    });
+
+    function openStudentEditModal(studentId) {
+      var student = students.find(function(item) { return String(item.id) === String(studentId); });
+      if (!student) return;
+      editingStudentId = student.id;
+      studentEditName.value = student.name;
+      studentEditPhone.value = student.phone || "";
+      studentEditDay.value = String(student.classDay);
+      studentEditTime.value = student.classTime;
+      studentEditNotes.value = student.notes || "";
+      studentEditModal.hidden = false;
+    }
+
+    function closeStudentEditModal() { studentEditModal.hidden = true; editingStudentId = null; studentEditForm.reset(); }
+
+    studentEditCancel.addEventListener("click", closeStudentEditModal);
+    studentEditModal.addEventListener("click", function(event) { if (event.target === studentEditModal) closeStudentEditModal(); });
+
+    studentEditForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+      if (!editingStudentId) return;
+      requestJson(STUDENTS_API, { method:"PATCH", body:JSON.stringify({
+        id:editingStudentId,
+        teacherId:activeTeacherId(),
+        name:studentEditName.value.trim(),
+        phone:studentEditPhone.value.trim(),
+        classDay:studentEditDay.value,
+        classTime:studentEditTime.value,
+        notes:studentEditNotes.value.trim()
+      }) }).then(function() {
+        closeStudentEditModal();
+        return Promise.all([loadStudents(), loadCalendarRecords()]);
+      }).then(renderAll).catch(function(error) { alert(error.message); });
+    });
 
     teacherScopeSelect.addEventListener("change", function() { selectedTeacherId = Number(teacherScopeSelect.value); Promise.all([loadStudents(), loadRecords(), loadCalendarRecords(), loadPendingReplacements()]).then(renderAll).catch(function(error) { alert(error.message); }); });
     attendanceDate.addEventListener("change", function() { Promise.all([loadRecords(), loadCalendarRecords()]).then(renderAll).catch(function(error) { alert(error.message); }); });

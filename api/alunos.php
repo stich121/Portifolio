@@ -63,13 +63,48 @@ if ($method === 'POST') {
 if ($method === 'PATCH') {
     $data = request_data();
     $id = (int)($data['id'] ?? 0);
-    $isActive = (int)($data['isActive'] ?? 1);
 
     if ($id < 1) {
         json_response(['error' => 'Aluno invalido.'], 422);
     }
 
     $allowedTeacherId = resolve_teacher_scope((int)($data['teacherId'] ?? 0));
+
+    if (array_key_exists('name', $data)) {
+        require_access_level(3);
+
+        $name = trim((string)($data['name'] ?? ''));
+        $phone = trim((string)($data['phone'] ?? ''));
+        $classDay = (int)($data['classDay'] ?? -1);
+        $classTime = trim((string)($data['classTime'] ?? ''));
+        $notes = trim((string)($data['notes'] ?? ''));
+
+        if ($name === '') {
+            json_response(['error' => 'Informe o nome do aluno.'], 422);
+        }
+
+        if ($classDay < 0 || $classDay > 6 || !preg_match('/^\d{2}:\d{2}$/', $classTime)) {
+            json_response(['error' => 'Informe dia e horario validos.'], 422);
+        }
+
+        $stmt = $pdo->prepare(
+            'UPDATE alunos SET name = :name, phone = :phone, class_day = :class_day, class_time = :class_time, notes = :notes
+             WHERE id = :id AND teacher_id = :teacher_id'
+        );
+        $stmt->execute([
+            ':name' => $name,
+            ':phone' => $phone !== '' ? $phone : null,
+            ':class_day' => $classDay,
+            ':class_time' => $classTime . ':00',
+            ':notes' => $notes !== '' ? $notes : null,
+            ':id' => $id,
+            ':teacher_id' => $allowedTeacherId,
+        ]);
+
+        json_response(['ok' => true]);
+    }
+
+    $isActive = (int)($data['isActive'] ?? 1);
     $stmt = $pdo->prepare('UPDATE alunos SET is_active = :is_active WHERE id = :id AND teacher_id = :teacher_id');
     $stmt->execute([':is_active' => $isActive ? 1 : 0, ':id' => $id, ':teacher_id' => $allowedTeacherId]);
 
