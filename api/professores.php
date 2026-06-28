@@ -30,7 +30,7 @@ if ($method === 'POST') {
     }
 
     if ($level < 1 || $level > 3) {
-        json_response(['error' => 'Nivel invalido. Use 1, 2 ou 3.'], 422);
+        json_response(['error' => 'Nível inválido. Use 1, 2 ou 3.'], 422);
     }
 
     $stmt = $pdo->prepare(
@@ -46,7 +46,7 @@ if ($method === 'POST') {
         ]);
     } catch (PDOException $exception) {
         if ($exception->getCode() === '23000') {
-            json_response(['error' => 'Ja existe um professor com esse login.'], 409);
+            json_response(['error' => 'Já existe um professor com esse login.'], 409);
         }
         throw $exception;
     }
@@ -61,12 +61,12 @@ if ($method === 'PATCH') {
     $isActive = isset($data['isActive']) ? (int)$data['isActive'] : null;
 
     if ($id < 1) {
-        json_response(['error' => 'Professor invalido.'], 422);
+        json_response(['error' => 'Professor inválido.'], 422);
     }
 
     if ($level !== null) {
         if ($level < 1 || $level > 3) {
-            json_response(['error' => 'Nivel invalido.'], 422);
+            json_response(['error' => 'Nível inválido.'], 422);
         }
         $stmt = $pdo->prepare('UPDATE access_users SET access_level = :access_level WHERE id = :id');
         $stmt->execute([':access_level' => $level, ':id' => $id]);
@@ -80,4 +80,4 @@ if ($method === 'PATCH') {
     json_response(['ok' => true]);
 }
 
-json_response(['error' => 'Metodo nao permitido.'], 405);
+json_response(['error' => 'Método não permitido.'], 405);

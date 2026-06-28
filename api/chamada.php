@@ -43,7 +43,7 @@ if ($method === 'GET') {
 
     if ($month !== '') {
         if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
-            json_response(['error' => 'Mes invalido.'], 422);
+            json_response(['error' => 'Mês inválido.'], 422);
         }
 
         $monthStart = $month . '-01';
@@ -122,7 +122,7 @@ if ($method === 'GET') {
 
     if ($start !== '' || $end !== '') {
         if (!valid_date_value($start) || !valid_date_value($end) || $start > $end) {
-            json_response(['error' => 'Periodo invalido.'], 422);
+            json_response(['error' => 'Período inválido.'], 422);
         }
 
         $stmt = $pdo->prepare(
@@ -150,7 +150,7 @@ if ($method === 'GET') {
     $date = trim((string)($_GET['date'] ?? date('Y-m-d')));
 
     if (!valid_date_value($date)) {
-        json_response(['error' => 'Data invalida.'], 422);
+        json_response(['error' => 'Data inválida.'], 422);
     }
 
     $stmt = $pdo->prepare(
@@ -184,15 +184,15 @@ if ($method === 'POST') {
     $replacementTime = trim((string)($data['replacementTime'] ?? ''));
 
     if ($studentId < 1 || !valid_date_value($date) || !valid_status($status)) {
-        json_response(['error' => 'Dados invalidos.'], 422);
+        json_response(['error' => 'Dados inválidos.'], 422);
     }
 
     if ($replacementDate !== '' && !valid_date_value($replacementDate)) {
-        json_response(['error' => 'Data da reposicao invalida.'], 422);
+        json_response(['error' => 'Data da reposição inválida.'], 422);
     }
 
     if ($replacementTime !== '' && !valid_time_value($replacementTime)) {
-        json_response(['error' => 'Horario da reposicao invalido.'], 422);
+        json_response(['error' => 'Horário da reposição inválido.'], 422);
     }
 
     if ($status !== 'Reposicao') {
@@ -204,7 +204,7 @@ if ($method === 'POST') {
     $check = $pdo->prepare('SELECT id FROM alunos WHERE id = :id AND teacher_id = :teacher_id AND is_active = 1');
     $check->execute([':id' => $studentId, ':teacher_id' => $allowedTeacherId]);
     if (!$check->fetch()) {
-        json_response(['error' => 'Aluno nao pertence ao professor selecionado.'], 403);
+        json_response(['error' => 'Aluno não pertence ao professor selecionado.'], 403);
     }
 
     $stmt = $pdo->prepare(
@@ -227,4 +227,4 @@ if ($method === 'POST') {
     json_response(['ok' => true]);
 }
 
-json_response(['error' => 'Metodo nao permitido.'], 405);
+json_response(['error' => 'Método não permitido.'], 405);

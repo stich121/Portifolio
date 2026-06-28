@@ -143,7 +143,7 @@
       <div class="gate-card">
         <div class="brand"><div class="brand-mark">D</div><div><strong>Devstich</strong><span>Acesso reservado</span></div></div>
         <h1>Agenda de Aulas</h1>
-        <p>Area privada para calendario, alunos, horarios de aula e controle de presenca.</p>
+        <p>Área privada para calendário, alunos, horários de aula e controle de presença.</p>
         <form id="accessForm">
           <div class="field"><label for="accessLogin">Login</label><input id="accessLogin" name="accessLogin" type="text" autocomplete="username" placeholder="Digite seu login"></div>
           <div class="field password-wrap"><label for="accessPassword">Senha</label><input id="accessPassword" name="accessPassword" type="password" autocomplete="current-password" placeholder="Digite sua senha"><button class="password-toggle" id="togglePassword" type="button" aria-controls="accessPassword" aria-label="Mostrar senha">Mostrar</button></div>
@@ -161,12 +161,12 @@
 
       <section class="hero">
         <div>
-          <h1>Calendario e alunos</h1>
-          <p>Cadastre os alunos uma vez, escolha o dia e o horario. Cada aula ocupa automaticamente 1 hora no calendario.</p>
+          <h1>Calendário e alunos</h1>
+          <p>Cadastre os alunos uma vez, escolha o dia e o horário. Cada aula ocupa automaticamente 1 hora no calendário.</p>
           <div class="tabs" role="tablist">
-            <button class="tab-btn active" type="button" data-view="calendarView">Calendario</button>
+            <button class="tab-btn active" type="button" data-view="calendarView">Calendário</button>
             <button class="tab-btn" type="button" data-view="studentsView">Alunos</button>
-            <button class="tab-btn" type="button" data-view="presenceView">Presenca</button>
+            <button class="tab-btn" type="button" data-view="presenceView">Presença</button>
             <button class="tab-btn" id="teachersTab" type="button" data-view="teachersView" hidden>Professores</button>
           </div>
           <div class="teacher-scope" id="teacherScope" hidden>
@@ -189,18 +189,18 @@
 
       <section class="view active" id="calendarView">
         <div class="calendar-layout">
-          <section class="panel" aria-label="Calendario de aulas">
+          <section class="panel" aria-label="Calendário de aulas">
             <div class="calendar-tools">
-              <button class="ghost-btn" id="prevMonth" type="button">Mes anterior</button>
-              <h2 class="calendar-title" id="calendarTitle">Calendario</h2>
-              <button class="ghost-btn" id="nextMonth" type="button">Proximo mes</button>
+              <button class="ghost-btn" id="prevMonth" type="button">Mês anterior</button>
+              <h2 class="calendar-title" id="calendarTitle">Calendário</h2>
+              <button class="ghost-btn" id="nextMonth" type="button">Próximo mês</button>
             </div>
             <div class="calendar-scroll"><div class="calendar-grid" id="calendarGrid"></div></div>
           </section>
-          <section class="panel pending-panel" aria-label="Reposicoes pendentes">
+          <section class="panel pending-panel" aria-label="Reposições pendentes">
             <div class="panel-head"><h2>Reposições pendentes</h2></div>
             <div class="pending-list" id="pendingList"></div>
-            <div class="empty" id="pendingEmpty">Nenhuma reposicao pendente.</div>
+            <div class="empty" id="pendingEmpty">Nenhuma reposição pendente.</div>
           </section>
         </div>
       </section>
@@ -211,9 +211,9 @@
           <form class="form-grid" id="studentForm">
             <div class="field"><label for="studentName">Nome do aluno</label><input id="studentName" name="studentName" type="text" placeholder="Ex.: Ana Silva" required></div>
             <div class="field"><label for="studentPhone">Telefone</label><input id="studentPhone" name="studentPhone" type="text" placeholder="Opcional"></div>
-            <div class="field"><label for="classDay">Dia da aula</label><select id="classDay" name="classDay"><option value="1">Segunda-feira</option><option value="2">Terca-feira</option><option value="3">Quarta-feira</option><option value="4">Quinta-feira</option><option value="5">Sexta-feira</option><option value="6">Sabado</option><option value="0">Domingo</option></select></div>
-            <div class="field"><label for="classTime">Horario</label><input id="classTime" name="classTime" type="time" required></div>
-            <div class="field" style="grid-column:1 / -1"><label for="studentNotes">Observacoes</label><textarea id="studentNotes" name="studentNotes" placeholder="Opcional"></textarea></div>
+            <div class="field"><label for="classDay">Dia da aula</label><select id="classDay" name="classDay"><option value="1">Segunda-feira</option><option value="2">Terça-feira</option><option value="3">Quarta-feira</option><option value="4">Quinta-feira</option><option value="5">Sexta-feira</option><option value="6">Sábado</option><option value="0">Domingo</option></select></div>
+            <div class="field"><label for="classTime">Horário</label><input id="classTime" name="classTime" type="time" required></div>
+            <div class="field" style="grid-column:1 / -1"><label for="studentNotes">Observações</label><textarea id="studentNotes" name="studentNotes" placeholder="Opcional"></textarea></div>
             <div class="form-actions"><button class="primary-btn" type="submit">Cadastrar aluno</button></div>
           </form>
         </section>
@@ -221,46 +221,46 @@
         <section class="panel" aria-label="Alunos cadastrados">
           <div class="panel-head"><h2>Alunos cadastrados</h2><span class="student-badge">Aulas de 1 hora</span></div>
           <div class="table-wrap">
-            <table><thead><tr><th>Aluno</th><th>Telefone</th><th>Dia</th><th>Horario</th><th>Status</th><th></th></tr></thead><tbody id="studentsBody"></tbody></table>
+            <table><thead><tr><th>Aluno</th><th>Telefone</th><th>Dia</th><th>Horário</th><th>Status</th><th></th></tr></thead><tbody id="studentsBody"></tbody></table>
             <div class="empty" id="studentsEmpty">Nenhum aluno cadastrado ainda.</div>
           </div>
         </section>
       </section>
 
       <section class="view" id="presenceView">
-        <section class="panel" aria-label="Lista de presenca dos alunos">
-          <div class="panel-head"><h2 id="attendanceTitle">Lista de presenca</h2><span class="student-badge">Alunos ativos cadastrados</span></div>
+        <section class="panel" aria-label="Lista de presença dos alunos">
+          <div class="panel-head"><h2 id="attendanceTitle">Lista de presença</h2><span class="student-badge">Alunos ativos cadastrados</span></div>
           <div class="attendance-tools">
             <div class="status-buttons" id="attendanceModeButtons">
               <button class="status-btn active" type="button" data-attendance-mode="day">Dia</button>
-              <button class="status-btn" type="button" data-attendance-mode="month">Mes</button>
+              <button class="status-btn" type="button" data-attendance-mode="month">Mês</button>
             </div>
             <div class="field" id="attendanceDayField"><label for="attendanceDate">Data da chamada</label><input id="attendanceDate" type="date"></div>
-            <div class="field" id="attendanceMonthField" hidden><label for="attendanceMonth">Mes</label><input id="attendanceMonth" type="month"></div>
+            <div class="field" id="attendanceMonthField" hidden><label for="attendanceMonth">Mês</label><input id="attendanceMonth" type="month"></div>
             <span class="student-badge" id="attendanceSummary">0 presentes</span>
             <button class="ghost-btn" id="printAttendance" type="button">Imprimir / PDF</button>
           </div>
           <h3 class="print-heading" id="printHeading"></h3>
           <div class="table-wrap">
-            <table><thead><tr><th>Data</th><th>Aluno</th><th>Dia da aula</th><th>Horario</th><th>Status</th></tr></thead><tbody id="attendanceBody"></tbody></table>
+            <table><thead><tr><th>Data</th><th>Aluno</th><th>Dia da aula</th><th>Horário</th><th>Status</th></tr></thead><tbody id="attendanceBody"></tbody></table>
             <div class="empty" id="attendanceEmpty">Nenhum aluno ativo cadastrado ainda.</div>
           </div>
         </section>
       </section>
       <section class="view" id="teachersView" hidden>
         <section class="panel" aria-label="Adicionar professor">
-          <div class="panel-head"><h2>Novo professor</h2><span class="student-badge">Apenas nivel 3</span></div>
+          <div class="panel-head"><h2>Novo professor</h2><span class="student-badge">Apenas nível 3</span></div>
           <form class="form-grid" id="teacherForm">
             <div class="field"><label for="teacherUsername">Login</label><input id="teacherUsername" name="teacherUsername" type="text" autocomplete="off" placeholder="Ex.: Professor.nome" required></div>
             <div class="field"><label for="teacherPassword">Senha</label><input id="teacherPassword" name="teacherPassword" type="password" autocomplete="new-password" placeholder="Senha inicial" required></div>
-            <div class="field"><label for="teacherLevel">Nivel</label><select id="teacherLevel" name="teacherLevel"><option value="1">Nivel 1</option><option value="2">Nivel 2</option><option value="3">Nivel 3</option></select></div>
+            <div class="field"><label for="teacherLevel">Nível</label><select id="teacherLevel" name="teacherLevel"><option value="1">Nível 1</option><option value="2">Nível 2</option><option value="3">Nível 3</option></select></div>
             <div class="form-actions"><button class="primary-btn" type="submit">Adicionar professor</button></div>
           </form>
         </section>
         <section class="panel" aria-label="Professores cadastrados">
           <div class="panel-head"><h2>Professores cadastrados</h2></div>
           <div class="table-wrap">
-            <table><thead><tr><th>Login</th><th>Nivel</th><th>Status</th><th>Criado em</th><th></th></tr></thead><tbody id="teachersBody"></tbody></table>
+            <table><thead><tr><th>Login</th><th>Nível</th><th>Status</th><th>Criado em</th><th></th></tr></thead><tbody id="teachersBody"></tbody></table>
             <div class="empty" id="teachersEmpty">Nenhum professor cadastrado ainda.</div>
           </div>
         </section>
@@ -271,27 +271,27 @@
 
   <div class="modal-backdrop" id="replacementModal" hidden>
     <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="replacementTitle">
-      <h2 id="replacementTitle">Reposicao da aula</h2>
-      <p id="replacementText">Quer marcar esta aula como reposicao?</p>
+      <h2 id="replacementTitle">Reposição da aula</h2>
+      <p id="replacementText">Quer marcar esta aula como reposição?</p>
       <div id="replacementStepChoice">
         <div class="modal-actions">
           <button class="primary-btn" id="replacementYes" type="button">Sim</button>
-          <button class="ghost-btn" id="replacementNo" type="button">Nao</button>
+          <button class="ghost-btn" id="replacementNo" type="button">Não</button>
         </div>
       </div>
       <div id="replacementStepSchedule" hidden>
         <div class="modal-actions">
           <button class="primary-btn" id="replacementHasDate" type="button">Sim</button>
-          <button class="ghost-btn" id="replacementNoDate" type="button">Nao</button>
+          <button class="ghost-btn" id="replacementNoDate" type="button">Não</button>
         </div>
       </div>
       <form id="replacementForm" hidden>
         <div class="modal-grid">
-          <div class="field"><label for="replacementDate">Dia da reposicao</label><input id="replacementDate" type="date"></div>
-          <div class="field"><label for="replacementTime">Horario</label><input id="replacementTime" type="time"></div>
+          <div class="field"><label for="replacementDate">Dia da reposição</label><input id="replacementDate" type="date"></div>
+          <div class="field"><label for="replacementTime">Horário</label><input id="replacementTime" type="time"></div>
         </div>
         <div class="modal-actions">
-          <button class="primary-btn" type="submit">Salvar reposicao</button>
+          <button class="primary-btn" type="submit">Salvar reposição</button>
           <button class="ghost-btn" id="replacementBack" type="button">Voltar</button>
         </div>
       </form>
@@ -303,7 +303,7 @@
 
   <div class="modal-backdrop" id="pendingModal" hidden>
     <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="pendingModalTitle">
-      <h2 id="pendingModalTitle">Reposicoes pendentes</h2>
+      <h2 id="pendingModalTitle">Reposições pendentes</h2>
       <p id="pendingModalSubtitle"></p>
       <div id="pendingModalList"></div>
       <div class="modal-actions">
@@ -319,12 +319,12 @@
         <div class="modal-grid">
           <div class="field" style="grid-column:1 / -1"><label for="studentEditName">Nome do aluno</label><input id="studentEditName" type="text" required></div>
           <div class="field" style="grid-column:1 / -1"><label for="studentEditPhone">Telefone</label><input id="studentEditPhone" type="text" placeholder="Opcional"></div>
-          <div class="field"><label for="studentEditDay">Dia da aula</label><select id="studentEditDay"><option value="1">Segunda-feira</option><option value="2">Terca-feira</option><option value="3">Quarta-feira</option><option value="4">Quinta-feira</option><option value="5">Sexta-feira</option><option value="6">Sabado</option><option value="0">Domingo</option></select></div>
-          <div class="field"><label for="studentEditTime">Horario</label><input id="studentEditTime" type="time" required></div>
-          <div class="field" style="grid-column:1 / -1"><label for="studentEditNotes">Observacoes</label><textarea id="studentEditNotes" placeholder="Opcional"></textarea></div>
+          <div class="field"><label for="studentEditDay">Dia da aula</label><select id="studentEditDay"><option value="1">Segunda-feira</option><option value="2">Terça-feira</option><option value="3">Quarta-feira</option><option value="4">Quinta-feira</option><option value="5">Sexta-feira</option><option value="6">Sábado</option><option value="0">Domingo</option></select></div>
+          <div class="field"><label for="studentEditTime">Horário</label><input id="studentEditTime" type="time" required></div>
+          <div class="field" style="grid-column:1 / -1"><label for="studentEditNotes">Observações</label><textarea id="studentEditNotes" placeholder="Opcional"></textarea></div>
         </div>
         <div class="modal-actions">
-          <button class="primary-btn" type="submit">Salvar alteracoes</button>
+          <button class="primary-btn" type="submit">Salvar alterações</button>
           <button class="ghost-btn" id="studentEditCancel" type="button">Cancelar</button>
         </div>
       </form>
@@ -335,7 +335,7 @@
     var ATTENDANCE_API = "/api/chamada.php";
     var STUDENTS_API = "/api/alunos.php";
     var TEACHERS_API = "/api/professores.php";
-    var dayNames = ["Domingo", "Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado"];
+    var dayNames = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
     var monthCursor = new Date();
     monthCursor.setDate(1);
     var records = [];
@@ -420,7 +420,7 @@
     function requestJson(url, options) {
       return fetch(url, Object.assign({ headers:{ "Content-Type":"application/json" }, credentials:"same-origin" }, options || {})).then(function(response) {
         return response.json().then(function(payload) {
-          if (!response.ok) throw new Error(payload.error || "Erro ao processar solicitacao.");
+          if (!response.ok) throw new Error(payload.error || "Erro ao processar solicitação.");
           return payload;
         });
       });
@@ -452,7 +452,7 @@
       if (!selectedTeacherId) selectedTeacherId = Number(currentTeacher && currentTeacher.id ? currentTeacher.id : 0);
       teacherScope.hidden = false;
       teacherScopeSelect.innerHTML = teachers.map(function(teacher) {
-        return "<option value=\"" + teacher.id + "\">" + escapeHtml(teacher.username) + " - Nivel " + escapeHtml(teacher.accessLevel) + "</option>";
+        return "<option value=\"" + teacher.id + "\">" + escapeHtml(teacher.username) + " - Nível " + escapeHtml(teacher.accessLevel) + "</option>";
       }).join("");
       teacherScopeSelect.value = String(selectedTeacherId);
     }
@@ -498,7 +498,7 @@
         var isToday = currentKey === today ? " today" : "";
         var lessons = students.filter(function(student) { return Number(student.isActive) === 1 && Number(student.classDay) === current.getDay(); }).sort(function(a, b) { return a.classTime.localeCompare(b.classTime); });
         html += "<div class=\"day-cell" + muted + isToday + "\"><div class=\"day-number\">" + current.getDate() + "</div>";
-        html += lessons.map(function(student) { var record = calendarRecord(student.id, currentKey) || {}; var status = record.status || "Pendente"; var isReplacement = status === "Reposicao"; var replacementInfo = record.replacementDate ? " - " + formatDateLabel(record.replacementDate) + (record.replacementTime ? " as " + record.replacementTime : "") : ""; return "<button class=\"lesson " + (isReplacement ? "replacement" : "") + "\" type=\"button\" data-lesson-student=\"" + student.id + "\" data-lesson-date=\"" + currentKey + "\" data-lesson-status=\"" + status + "\"><strong>" + escapeHtml(student.classTime) + " - " + escapeHtml(addMinutes(student.classTime, 60)) + "</strong><span>" + escapeHtml(student.name) + "</span>" + (isReplacement ? "<em class=\"lesson-status\">Pendente para reposicao" + escapeHtml(replacementInfo) + "</em>" : "") + "</button>"; }).join("");
+        html += lessons.map(function(student) { var record = calendarRecord(student.id, currentKey) || {}; var status = record.status || "Pendente"; var isReplacement = status === "Reposicao"; var replacementInfo = record.replacementDate ? " - " + formatDateLabel(record.replacementDate) + (record.replacementTime ? " às " + record.replacementTime : "") : ""; return "<button class=\"lesson " + (isReplacement ? "replacement" : "") + "\" type=\"button\" data-lesson-student=\"" + student.id + "\" data-lesson-date=\"" + currentKey + "\" data-lesson-status=\"" + status + "\"><strong>" + escapeHtml(student.classTime) + " - " + escapeHtml(addMinutes(student.classTime, 60)) + "</strong><span>" + escapeHtml(student.name) + "</span>" + (isReplacement ? "<em class=\"lesson-status\">Pendente para reposição" + escapeHtml(replacementInfo) + "</em>" : "") + "</button>"; }).join("");
         html += "</div>";
       }
       calendarGrid.innerHTML = html;
@@ -514,12 +514,12 @@
     }
 
     function renderPresence() {
-      attendanceTitle.textContent = "Lista de presenca - " + selectedTeacherName();
+      attendanceTitle.textContent = "Lista de presença - " + selectedTeacherName();
       var present = records.filter(function(record) { return record.status === "Presente"; }).length;
       attendanceSummary.textContent = present + " presentes de " + records.length + " aulas";
       attendanceEmpty.style.display = records.length ? "none" : "block";
       attendanceBody.innerHTML = records.map(function(record) {
-        return "<tr><td>" + formatDateLabel(record.attendanceDate) + "</td><td>" + escapeHtml(record.name) + "</td><td>" + dayNames[Number(record.classDay)] + "</td><td>" + escapeHtml(record.classTime) + " - " + escapeHtml(addMinutes(record.classTime, 60)) + "</td><td><div class=\"status-buttons\"><button class=\"status-btn " + (record.status === "Presente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Presente\">Presente</button><button class=\"status-btn pending " + (record.status === "Pendente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Pendente\">Pendente</button><button class=\"status-btn absent " + (record.status === "Ausente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Ausente\">Ausente</button><button class=\"status-btn pending " + (record.status === "Reposicao" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Reposicao\">Reposicao</button></div></td></tr>";
+        return "<tr><td>" + formatDateLabel(record.attendanceDate) + "</td><td>" + escapeHtml(record.name) + "</td><td>" + dayNames[Number(record.classDay)] + "</td><td>" + escapeHtml(record.classTime) + " - " + escapeHtml(addMinutes(record.classTime, 60)) + "</td><td><div class=\"status-buttons\"><button class=\"status-btn " + (record.status === "Presente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Presente\">Presente</button><button class=\"status-btn pending " + (record.status === "Pendente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Pendente\">Pendente</button><button class=\"status-btn absent " + (record.status === "Ausente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Ausente\">Ausente</button><button class=\"status-btn pending " + (record.status === "Reposicao" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Reposicao\">Reposição</button></div></td></tr>";
       }).join("");
       renderKpis();
     }
@@ -544,7 +544,7 @@
       if (!dates.length) return;
       pendingModalSubtitle.textContent = dates[0].name;
       pendingModalList.innerHTML = dates.map(function(record) {
-        return "<form class=\"pending-row\" data-pending-student=\"" + record.studentId + "\" data-pending-date=\"" + record.attendanceDate + "\"><p>Faltou em " + formatDateLabel(record.attendanceDate) + "</p><div class=\"modal-grid\"><div class=\"field\"><label>Dia da reposicao</label><input type=\"date\" required></div><div class=\"field\"><label>Horario</label><input type=\"time\" required></div></div><div class=\"modal-actions\"><button class=\"primary-btn\" type=\"submit\">Salvar reposicao</button></div></form>";
+        return "<form class=\"pending-row\" data-pending-student=\"" + record.studentId + "\" data-pending-date=\"" + record.attendanceDate + "\"><p>Faltou em " + formatDateLabel(record.attendanceDate) + "</p><div class=\"modal-grid\"><div class=\"field\"><label>Dia da reposição</label><input type=\"date\" required></div><div class=\"field\"><label>Horário</label><input type=\"time\" required></div></div><div class=\"modal-actions\"><button class=\"primary-btn\" type=\"submit\">Salvar reposição</button></div></form>";
       }).join("");
       pendingModal.hidden = false;
     }
@@ -581,7 +581,7 @@
       teachersEmpty.style.display = teachers.length ? "none" : "block";
       teachersBody.innerHTML = teachers.map(function(teacher) {
         var active = Number(teacher.isActive) === 1;
-        return "<tr><td>" + escapeHtml(teacher.username) + "</td><td>Nivel " + escapeHtml(teacher.accessLevel) + "</td><td>" + (active ? "Ativo" : "Pausado") + "</td><td>" + formatter.format(new Date(teacher.createdAt)) + "</td><td><div class=\"row-actions\"><button class=\"icon-btn\" type=\"button\" title=\"Ativar/pausar\" data-teacher-toggle=\"" + teacher.id + "\">" + (active ? "II" : "OK") + "</button></div></td></tr>";
+        return "<tr><td>" + escapeHtml(teacher.username) + "</td><td>Nível " + escapeHtml(teacher.accessLevel) + "</td><td>" + (active ? "Ativo" : "Pausado") + "</td><td>" + formatter.format(new Date(teacher.createdAt)) + "</td><td><div class=\"row-actions\"><button class=\"icon-btn\" type=\"button\" title=\"Ativar/pausar\" data-teacher-toggle=\"" + teacher.id + "\">" + (active ? "II" : "OK") + "</button></div></td></tr>";
       }).join("");
     }
 
@@ -612,7 +612,7 @@
       var student = students.find(function(item) { return Number(item.id) === Number(lesson.dataset.lessonStudent); });
       var record = calendarRecord(lesson.dataset.lessonStudent, lesson.dataset.lessonDate) || {};
       pendingLesson = { studentId:lesson.dataset.lessonStudent, date:lesson.dataset.lessonDate };
-      replacementText.textContent = "Quer marcar a aula de " + (student ? student.name : "aluno") + " como reposicao?";
+      replacementText.textContent = "Quer marcar a aula de " + (student ? student.name : "aluno") + " como reposição?";
       replacementDate.value = record.replacementDate || "";
       replacementTime.value = record.replacementTime || "";
       showReplacementStep("choice");
@@ -627,7 +627,7 @@
 
     replacementYes.addEventListener("click", function() {
       if (!pendingLesson) return;
-      replacementText.textContent = "Ja tem dia e horario da reposicao?";
+      replacementText.textContent = "Já tem dia e horário da reposição?";
       showReplacementStep("schedule");
     });
 
@@ -637,7 +637,7 @@
     });
 
     replacementHasDate.addEventListener("click", function() {
-      replacementText.textContent = "Informe o dia e horario da reposicao.";
+      replacementText.textContent = "Informe o dia e horário da reposição.";
       showReplacementStep("form");
     });
 
@@ -647,7 +647,7 @@
     });
 
     replacementBack.addEventListener("click", function() {
-      replacementText.textContent = "Ja tem dia e horario da reposicao?";
+      replacementText.textContent = "Já tem dia e horário da reposição?";
       showReplacementStep("schedule");
     });
 
@@ -661,7 +661,7 @@
       event.preventDefault();
       if (!pendingLesson) return;
       if (!replacementDate.value || !replacementTime.value) {
-        alert("Informe o dia e o horario da reposicao.");
+        alert("Informe o dia e o horário da reposição.");
         return;
       }
       saveLessonStatus(pendingLesson.studentId, pendingLesson.date, "Reposicao", replacementDate.value, replacementTime.value).then(closeReplacementModal).catch(function(error) { alert(error.message); });
@@ -736,7 +736,7 @@
       var label = attendanceMode === "month"
         ? (function() { var title = new Intl.DateTimeFormat("pt-BR", { month:"long", year:"numeric" }).format(new Date(attendanceMonth.value + "-01")); return title.charAt(0).toUpperCase() + title.slice(1); })()
         : formatDateLabel(attendanceDate.value);
-      printHeading.textContent = "Lista de presenca - " + selectedTeacherName() + " - " + label;
+      printHeading.textContent = "Lista de presença - " + selectedTeacherName() + " - " + label;
       document.body.classList.add("printing");
       window.print();
     });

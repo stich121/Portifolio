@@ -18,7 +18,7 @@ foreach ($configPaths as $path) {
 if ($configPath === null) {
     http_response_code(500);
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(['error' => 'Arquivo config.php nao configurado fora do public_html.']);
+    echo json_encode(['error' => 'Arquivo config.php não configurado fora do public_html.']);
     exit;
 }
 

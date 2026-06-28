@@ -20,7 +20,7 @@ if ($method === 'DELETE') {
 }
 
 if ($method !== 'POST') {
-    json_response(['error' => 'Metodo nao permitido.'], 405);
+    json_response(['error' => 'Método não permitido.'], 405);
 }
 
 $data = request_data();

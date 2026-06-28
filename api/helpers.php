@@ -22,7 +22,7 @@ function request_data(): array
 function require_auth(): void
 {
     if (empty($_SESSION['presence_authenticated'])) {
-        json_response(['error' => 'Nao autenticado.'], 401);
+        json_response(['error' => 'Não autenticado.'], 401);
     }
 }
 
@@ -41,7 +41,7 @@ function require_access_level(int $minimumLevel): void
     require_auth();
 
     if (current_teacher_level() < $minimumLevel) {
-        json_response(['error' => 'Acesso permitido apenas para nivel ' . $minimumLevel . '.'], 403);
+        json_response(['error' => 'Acesso permitido apenas para nível ' . $minimumLevel . '.'], 403);
     }
 }
 
@@ -51,7 +51,7 @@ function resolve_teacher_scope(int $requestedTeacherId = 0): int
 
     $ownTeacherId = current_teacher_id();
     if ($ownTeacherId < 1) {
-        json_response(['error' => 'Professor da sessao invalido.'], 401);
+        json_response(['error' => 'Professor da sessão inválido.'], 401);
     }
 
     if (current_teacher_level() === 3 && $requestedTeacherId > 0) {

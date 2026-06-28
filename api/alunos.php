@@ -41,7 +41,7 @@ if ($method === 'POST') {
     }
 
     if ($classDay < 0 || $classDay > 6 || !preg_match('/^\d{2}:\d{2}$/', $classTime)) {
-        json_response(['error' => 'Informe dia e horario validos.'], 422);
+        json_response(['error' => 'Informe dia e horário válidos.'], 422);
     }
 
     $stmt = $pdo->prepare(
@@ -65,7 +65,7 @@ if ($method === 'PATCH') {
     $id = (int)($data['id'] ?? 0);
 
     if ($id < 1) {
-        json_response(['error' => 'Aluno invalido.'], 422);
+        json_response(['error' => 'Aluno inválido.'], 422);
     }
 
     $allowedTeacherId = resolve_teacher_scope((int)($data['teacherId'] ?? 0));
@@ -84,7 +84,7 @@ if ($method === 'PATCH') {
         }
 
         if ($classDay < 0 || $classDay > 6 || !preg_match('/^\d{2}:\d{2}$/', $classTime)) {
-            json_response(['error' => 'Informe dia e horario validos.'], 422);
+            json_response(['error' => 'Informe dia e horário válidos.'], 422);
         }
 
         $stmt = $pdo->prepare(
@@ -116,7 +116,7 @@ if ($method === 'DELETE') {
     $id = (int)($data['id'] ?? 0);
 
     if ($id < 1) {
-        json_response(['error' => 'Aluno invalido.'], 422);
+        json_response(['error' => 'Aluno inválido.'], 422);
     }
 
     $allowedTeacherId = resolve_teacher_scope((int)($data['teacherId'] ?? 0));
@@ -126,4 +126,4 @@ if ($method === 'DELETE') {
     json_response(['ok' => true]);
 }
 
-json_response(['error' => 'Metodo nao permitido.'], 405);
+json_response(['error' => 'Método não permitido.'], 405);
