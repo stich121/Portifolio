@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de Privacidade — ObraCerta</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0A0A0F;
+      --surface: #101019;
+      --card: #15151F;
+      --border: #22222F;
+      --accent: #6366F6;
+      --accent-2: #8B8BFF;
+      --white: #F4F4F8;
+      --muted: #9090A6;
+      --display: 'Space Grotesk', sans-serif;
+      --body: 'Inter', sans-serif;
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .wrap {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 64px 24px 96px;
+    }
+
+    h1 {
+      font-family: var(--display);
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--white), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .updated {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+    }
+
+    .intro {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      color: var(--muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-family: var(--display);
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 40px 0 12px;
+      color: var(--white);
+    }
+
+    h3 {
+      font-family: var(--display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin: 20px 0 8px;
+      color: var(--white);
+    }
+
+    p {
+      margin-bottom: 12px;
+      color: #D6D6E4;
+    }
+
+    ul, ol {
+      margin: 0 0 12px 20px;
+      color: #D6D6E4;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    strong {
+      color: var(--white);
+    }
+
+    a {
+      color: var(--accent-2);
+    }
+
+    footer {
+      margin-top: 56px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>Política de Privacidade — ObraCerta (ObraLog)</h1>
+    <p class="updated">Última atualização: 02 de julho de 2026</p>
+
+    <div class="intro">
+      Esta Política de Privacidade descreve como o <strong>ObraCerta</strong> ("Aplicativo", "nós") coleta, usa,
+      armazena e protege os dados pessoais dos usuários ("você", "usuário"), em conformidade com a Lei Geral de
+      Proteção de Dados Pessoais (Lei nº 13.709/2018 — LGPD).
+      <br><br>
+      Ao criar uma conta ou utilizar o Aplicativo, você declara estar ciente e de acordo com esta Política.
+    </div>
+
+    <h2>1. Quem somos</h2>
+    <p>Controlador dos dados: <strong>Matheus Vinicius Oliveira Dias</strong>, CPF <strong>135.296.006-01</strong>,
+      com contato através do e-mail <strong>matheus@devstich.com.br</strong>.</p>
+
+    <h2>2. Quais dados coletamos</h2>
+    <h3>2.1 Dados fornecidos por você</h3>
+    <ul>
+      <li><strong>Cadastro e conta:</strong> nome, e-mail e senha (armazenada de forma criptografada/hash — nunca
+        em texto puro).</li>
+      <li><strong>Dados de empresa e obra:</strong> nome da empresa, obras/canteiros cadastrados,
+        membros/equipe vinculados a cada obra ou empresa, papéis e permissões de acesso.</li>
+      <li><strong>Diário de obra:</strong> registros diários (atividades, ocorrências, condições climáticas, mão de
+        obra, equipamentos), materiais utilizados/estocados, custos e valores lançados.</li>
+      <li><strong>Fotografias:</strong> imagens capturadas pela câmera do dispositivo ou selecionadas da galeria
+        para ilustrar registros do diário de obra.</li>
+      <li><strong>Comunicações:</strong> mensagens enviadas ao suporte, solicitações de redefinição de senha.</li>
+    </ul>
+
+    <h3>2.2 Dados coletados automaticamente</h3>
+    <ul>
+      <li><strong>Geolocalização:</strong> localização do dispositivo, coletada apenas quando você autoriza a
+        permissão de localização do sistema operacional, usada para associar registros/fotos ao local da obra.</li>
+      <li><strong>Dados de dispositivo e uso:</strong> modelo/sistema operacional, identificadores de sessão,
+        tokens de autenticação (JWT), registros técnicos (logs) de erros e acessos, com finalidade de segurança e
+        diagnóstico.</li>
+      <li><strong>Arquivos gerados:</strong> relatórios e PDFs consolidados criados a partir dos seus dados,
+        armazenados no dispositivo ou enviados por compartilhamento a seu pedido.</li>
+    </ul>
+
+    <h3>2.3 Dados que não coletamos</h3>
+    <p>Não coletamos dados de pagamento/cartão de crédito, nem dados de geolocalização em segundo plano sem sua
+      autorização explícita.</p>
+
+    <h2>3. Como usamos os dados</h2>
+    <p>Utilizamos os dados para:</p>
+    <ol>
+      <li>Criar e gerenciar sua conta e autenticação (login, recuperação de senha);</li>
+      <li>Permitir o cadastro e gerenciamento de empresas, obras, equipes, diários de obra, materiais e custos;</li>
+      <li>Associar fotografias e localização aos registros de obra, quando autorizado;</li>
+      <li>Gerar relatórios (diário, consolidado, de custos) e permitir exportação/compartilhamento em PDF;</li>
+      <li>Garantir a segurança da conta e prevenir fraudes e acessos não autorizados;</li>
+      <li>Cumprir obrigações legais e responder a solicitações de autoridades competentes;</li>
+      <li>Enviar comunicações operacionais essenciais (ex.: e-mails de redefinição de senha, avisos de
+        segurança).</li>
+    </ol>
+    <p>Não utilizamos seus dados para publicidade direcionada, não vendemos dados pessoais e não realizamos
+      perfilamento comportamental para fins comerciais.</p>
+
+    <h2>4. Base legal (LGPD)</h2>
+    <p>O tratamento de dados é realizado com base em:</p>
+    <ul>
+      <li><strong>Execução de contrato</strong> (art. 7º, V) — para viabilizar as funcionalidades do
+        Aplicativo;</li>
+      <li><strong>Consentimento</strong> (art. 7º, I) — para acesso a câmera e geolocalização, revogável a
+        qualquer momento nas configurações do dispositivo;</li>
+      <li><strong>Legítimo interesse</strong> (art. 7º, IX) — para segurança, prevenção a fraudes e melhoria do
+        serviço;</li>
+      <li><strong>Cumprimento de obrigação legal ou regulatória</strong> (art. 7º, II), quando aplicável.</li>
+    </ul>
+
+    <h2>5. Compartilhamento de dados</h2>
+    <p>Seus dados podem ser compartilhados com:</p>
+    <ul>
+      <li><strong>Prestadores de infraestrutura</strong>, como serviços de hospedagem de servidor e banco de
+        dados, e provedor de envio de e-mails transacionais (ex.: redefinição de senha), estritamente para operação
+        do Aplicativo;</li>
+      <li><strong>Outros usuários da mesma empresa/obra</strong>, conforme os papéis e permissões que você ou o
+        administrador da empresa configurarem (ex.: membros de uma obra podem visualizar diários e relatórios
+        daquela obra);</li>
+      <li><strong>Autoridades públicas</strong>, mediante requisição legal.</li>
+    </ul>
+    <p>Não compartilhamos dados pessoais com terceiros para fins de marketing.</p>
+
+    <h2>6. Armazenamento e segurança</h2>
+    <ul>
+      <li>Os dados são armazenados em banco de dados (PostgreSQL) hospedado em servidor próprio/contratado,
+        protegido por autenticação e controle de acesso.</li>
+      <li>Senhas são armazenadas com hash criptográfico, nunca em texto claro.</li>
+      <li>A comunicação entre aplicativo e servidor é realizada via conexão criptografada (HTTPS).</li>
+      <li>O acesso a recursos como câmera e localização é solicitado ao sistema operacional e pode ser revogado
+        por você a qualquer momento.</li>
+      <li>Apesar dos esforços de segurança, nenhum sistema é 100% imune a incidentes; em caso de violação de dados
+        relevante, comunicaremos os usuários afetados e a Autoridade Nacional de Proteção de Dados (ANPD), conforme
+        exigido em lei.</li>
+    </ul>
+
+    <h2>7. Retenção e exclusão de dados</h2>
+    <ul>
+      <li>Os dados são mantidos enquanto sua conta estiver ativa e pelo tempo necessário para cumprir as
+        finalidades descritas nesta Política ou obrigações legais/fiscais aplicáveis (ex.: registros de obra podem
+        ter valor probatório/contratual).</li>
+      <li>Você pode solicitar a exclusão da sua conta e dos dados pessoais associados, observadas eventuais
+        obrigações legais de retenção (ex.: dados fiscais, registros exigidos por lei).</li>
+      <li>Fotografias e relatórios exportados para o dispositivo ou compartilhados por você permanecem sob sua
+        responsabilidade após o compartilhamento.</li>
+    </ul>
+
+    <h2>8. Seus direitos (art. 18 da LGPD)</h2>
+    <p>Você pode, a qualquer momento, solicitar:</p>
+    <ul>
+      <li>Confirmação da existência de tratamento de dados;</li>
+      <li>Acesso, correção ou atualização dos seus dados;</li>
+      <li>Anonimização, bloqueio ou eliminação de dados desnecessários ou tratados em desconformidade com a
+        lei;</li>
+      <li>Portabilidade dos dados a outro fornecedor de serviço;</li>
+      <li>Eliminação dos dados tratados com base no consentimento;</li>
+      <li>Informação sobre entidades com as quais compartilhamos dados;</li>
+      <li>Revogação do consentimento (ex.: desativando permissões de câmera/localização no dispositivo).</li>
+    </ul>
+    <p>Solicitações podem ser feitas pelo e-mail <strong>matheus@devstich.com.br</strong>. Responderemos em prazo
+      razoável, conforme a LGPD.</p>
+
+    <h2>9. Crianças e adolescentes</h2>
+    <p>O Aplicativo é destinado a uso profissional/empresarial e não é direcionado a menores de 18 anos. Não
+      coletamos intencionalmente dados de crianças.</p>
+
+    <h2>10. Alterações desta Política</h2>
+    <p>Podemos atualizar esta Política periodicamente. A versão vigente estará sempre disponível no Aplicativo,
+      com indicação da data da última atualização. Alterações relevantes serão comunicadas por e-mail ou aviso no
+      Aplicativo.</p>
+
+    <h2>11. Contato</h2>
+    <p>Dúvidas, solicitações ou reclamações sobre privacidade podem ser enviadas para:
+      <strong>matheus@devstich.com.br</strong>.</p>
+
+    <footer>
+      ObraCerta — <a href="./obracerta-termos.html">Termos de Uso</a>
+    </footer>
+  </div>
+</body>
+
+</html>
