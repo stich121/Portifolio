@@ -434,6 +434,7 @@
     function calendarRecord(studentId, date) { return calendarRecords.find(function(record) { return Number(record.studentId) === Number(studentId) && record.attendanceDate === date; }); }
     function calendarStatus(studentId, date) { var found = calendarRecord(studentId, date); return found ? found.status : "Pendente"; }
     function formatDateLabel(value) { if (!value) return ""; var parts = value.split("-"); return parts.length === 3 ? parts[2] + "/" + parts[1] + "/" + parts[0] : value; }
+    function attendanceRecordDate(record) { return record.attendanceDate || attendanceDate.value; }
 
     function activeTeacherId() { return canManageTeachers() && selectedTeacherId > 0 ? selectedTeacherId : Number(currentTeacher && currentTeacher.id ? currentTeacher.id : 0); }
     function selectedTeacherName() {
@@ -520,7 +521,7 @@
       attendanceSummary.textContent = present + " presentes de " + records.length + " aulas";
       attendanceEmpty.style.display = records.length ? "none" : "block";
       attendanceBody.innerHTML = records.map(function(record) {
-        return "<tr><td>" + formatDateLabel(record.attendanceDate) + "</td><td>" + escapeHtml(record.name) + "</td><td>" + dayNames[Number(record.classDay)] + "</td><td>" + escapeHtml(record.classTime) + " - " + escapeHtml(addMinutes(record.classTime, 60)) + "</td><td><div class=\"status-buttons\"><button class=\"status-btn " + (record.status === "Presente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Presente\">Presente</button><button class=\"status-btn pending " + (record.status === "Pendente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Pendente\">Pendente</button><button class=\"status-btn absent " + (record.status === "Ausente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Ausente\">Ausente</button><button class=\"status-btn pending " + (record.status === "Reposicao" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + record.attendanceDate + "\" data-attendance-status=\"Reposicao\">Reposição</button></div></td></tr>";
+        return "<tr><td>" + formatDateLabel(attendanceRecordDate(record)) + "</td><td>" + escapeHtml(record.name) + "</td><td>" + dayNames[Number(record.classDay)] + "</td><td>" + escapeHtml(record.classTime) + " - " + escapeHtml(addMinutes(record.classTime, 60)) + "</td><td><div class=\"status-buttons\"><button class=\"status-btn " + (record.status === "Presente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + attendanceRecordDate(record) + "\" data-attendance-status=\"Presente\">Presente</button><button class=\"status-btn pending " + (record.status === "Pendente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + attendanceRecordDate(record) + "\" data-attendance-status=\"Pendente\">Pendente</button><button class=\"status-btn absent " + (record.status === "Ausente" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + attendanceRecordDate(record) + "\" data-attendance-status=\"Ausente\">Ausente</button><button class=\"status-btn pending " + (record.status === "Reposicao" ? "active" : "") + "\" type=\"button\" data-attendance-student=\"" + record.studentId + "\" data-attendance-date=\"" + attendanceRecordDate(record) + "\" data-attendance-status=\"Reposicao\">Reposição</button></div></td></tr>";
       }).join("");
       renderKpis();
     }
@@ -759,8 +760,8 @@
     attendanceBody.addEventListener("click", function(event) {
       var studentId = event.target.dataset.attendanceStudent;
       var status = event.target.dataset.attendanceStatus;
-      var date = event.target.dataset.attendanceDate;
-      if (!studentId || !status || !date) return;
+      var date = event.target.dataset.attendanceDate || attendanceDate.value;
+      if (!studentId || !status || !date || date === "undefined") return;
       saveLessonStatus(studentId, date, status, "", "").catch(function(error) { alert(error.message); });
     });
 

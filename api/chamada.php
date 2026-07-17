@@ -156,6 +156,7 @@ if ($method === 'GET') {
     $stmt = $pdo->prepare(
         'SELECT alunos.id AS studentId, alunos.teacher_id AS teacherId,
                 access_users.username AS teacherName, alunos.name, alunos.phone,
+                :selected_date AS attendanceDate,
                 alunos.class_day AS classDay,
                 TIME_FORMAT(alunos.class_time, "%H:%i") AS classTime,
                 COALESCE(chamadas.status, \'Pendente\') AS status,
@@ -170,7 +171,7 @@ if ($method === 'GET') {
          WHERE alunos.is_active = 1 AND alunos.teacher_id = :teacher_id
          ORDER BY alunos.class_day ASC, alunos.class_time ASC, alunos.name ASC'
     );
-    $stmt->execute([':attendance_date' => $date, ':teacher_id' => $teacherId]);
+    $stmt->execute([':selected_date' => $date, ':attendance_date' => $date, ':teacher_id' => $teacherId]);
 
     json_response(['date' => $date, 'teacherId' => $teacherId, 'records' => $stmt->fetchAll()]);
 }
@@ -228,3 +229,4 @@ if ($method === 'POST') {
 }
 
 json_response(['error' => 'Método não permitido.'], 405);
+
