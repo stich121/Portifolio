@@ -5,6 +5,31 @@
   const menuButton = document.querySelector('.menu-toggle');
   const mobilePanel = document.querySelector('.mobile-panel');
 
+  if (!reducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const cursorGlow = document.createElement('div');
+    cursorGlow.className = 'cursor-glow';
+    cursorGlow.setAttribute('aria-hidden', 'true');
+    document.body.prepend(cursorGlow);
+
+    let pointerX = window.innerWidth / 2;
+    let pointerY = window.innerHeight / 2;
+    let glowX = pointerX;
+    let glowY = pointerY;
+
+    window.addEventListener('mousemove', event => {
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+    }, { passive: true });
+
+    const moveGlow = () => {
+      glowX += (pointerX - glowX) * .12;
+      glowY += (pointerY - glowY) * .12;
+      cursorGlow.style.transform = `translate3d(${glowX}px, ${glowY}px, 0) translate(-50%, -50%)`;
+      requestAnimationFrame(moveGlow);
+    };
+
+    requestAnimationFrame(moveGlow);
+  }
   const closeMenu = () => {
     document.body.classList.remove('menu-open');
     menuButton?.setAttribute('aria-expanded', 'false');
@@ -104,3 +129,5 @@
     });
   }
 })();
+
+
