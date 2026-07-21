@@ -178,9 +178,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
   letter-spacing: .13em;
   text-transform: uppercase;
 }
-.hero-kicker::before,
-.eyebrow::before { content: ""; width: 30px; height: 2px; background: var(--signal); }
-
 .availability-dot {
   width: 8px;
   height: 8px;
