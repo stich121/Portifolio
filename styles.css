@@ -4,9 +4,10 @@
   --ink: #151515;
   --muted: #67645e;
   --line: rgba(21, 21, 21, .18);
-  --signal: #ff4d24;
-  --signal-dark: #d93612;
+  --signal: #536653;
+  --signal-dark: #344638;
   --night: #171717;
+  --contact-bg: #b8c2b2;
   --white: #fffdf8;
   --display: "Instrument Serif", Georgia, serif;
   --sans: "DM Sans", Arial, sans-serif;
@@ -151,7 +152,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   text-decoration: none;
   transition: color .25s, background .25s, transform .25s;
 }
-.nav-contact:hover { color: var(--ink); background: var(--signal); transform: translateY(-2px); }
+.nav-contact:hover { color: var(--white); background: var(--signal); transform: translateY(-2px); }
 
 .menu-toggle { display: none; }
 .mobile-panel { display: none; }
@@ -350,14 +351,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
   position: relative;
   overflow: hidden;
   padding: clamp(90px, 12vw, 170px) 0 70px;
-  color: var(--white);
-  background: var(--signal);
+  color: var(--ink);
+  background: var(--contact-bg);
 }
 .contact-inner { width: var(--page); margin: 0 auto; }
 .contact h2 { max-width: 1100px; margin: 0 0 55px; font-family: var(--display); font-size: clamp(4.5rem, 10vw, 10rem); font-weight: 400; line-height: .79; letter-spacing: -.06em; }
-.contact h2 em { color: var(--ink); font-weight: 400; }
+.contact h2 em { color: var(--signal-dark); font-weight: 400; }
 .contact-grid { display: grid; grid-template-columns: .75fr 1.25fr; gap: clamp(40px, 9vw, 130px); }
-.contact-note { color: rgba(255,255,255,.82); line-height: 1.7; }
+.contact-note { color: rgba(21,21,21,.72); line-height: 1.7; }
 .contact-note strong { color: var(--ink); }
 .contact-form { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 18px; }
 .field { display: grid; gap: 8px; }
