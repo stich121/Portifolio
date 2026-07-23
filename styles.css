@@ -190,6 +190,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .hero {
   position: relative;
   width: var(--page);
+  min-height: 100vh;
   min-height: 100svh;
   margin: 0 auto;
   padding: 150px 0 68px;
@@ -617,6 +618,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   position: relative;
   display: block;
   width: 100%;
+  min-height: 100vh;
   min-height: 100svh;
   padding: 0;
   overflow: hidden;
@@ -632,6 +634,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
   position: absolute;
   inset: 0;
   display: block;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   user-select: none;
   pointer-events: none;
@@ -645,20 +649,18 @@ button, a { -webkit-tap-highlight-color: transparent; }
   transform: scale(1.02);
 }
 
-.hero-reveal__bottom {
-  z-index: 1;
-  filter: saturate(.9) contrast(1.08) brightness(.62);
-}
-
-.hero-reveal__top {
+.hero-reveal__bottom-layer { z-index: 1; }
+.hero-reveal__top-layer {
   z-index: 2;
-  filter: grayscale(1) contrast(1.08) brightness(.92);
   clip-path: circle(0 at var(--hero-x) var(--hero-y));
-  transition: clip-path .18s linear, filter .4s ease;
+  transition: clip-path .18s linear;
 }
 
-.hero-reveal.is-ready .hero-reveal__top,
-.hero-reveal.is-pointing .hero-reveal__top {
+.hero-reveal__bottom { filter: saturate(.9) contrast(1.08) brightness(.62); }
+.hero-reveal__top { filter: grayscale(1) contrast(1.08) brightness(.92); }
+
+.hero-reveal.is-ready .hero-reveal__top-layer,
+.hero-reveal.is-pointing .hero-reveal__top-layer {
   clip-path: circle(var(--hero-r) at var(--hero-x) var(--hero-y));
 }
 
@@ -819,6 +821,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 @media (max-width: 680px) {
   .hero.hero-reveal {
+    min-height: 100vh;
     min-height: 100svh;
     background: #050507;
   }
@@ -895,13 +898,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media (hover: none), (pointer: coarse) {
   .hero.hero-reveal { cursor: auto; }
   .hero-reveal__cursor { display: none; }
-  .hero-reveal__top { clip-path: inset(0); opacity: .84; }
-  .hero-reveal.is-ready .hero-reveal__top,
-  .hero-reveal.is-pointing .hero-reveal__top { clip-path: inset(0); }
+  .hero-reveal__top-layer { clip-path: inset(0); }
+  .hero-reveal__top { opacity: .84; }
+  .hero-reveal.is-ready .hero-reveal__top-layer,
+  .hero-reveal.is-pointing .hero-reveal__top-layer { clip-path: inset(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-reveal__top { clip-path: inset(0); opacity: .78; }
+  .hero-reveal__top-layer { clip-path: inset(0); }
+  .hero-reveal__top { opacity: .78; }
   .hero-reveal__cursor { display: none; }
   .hero-reveal__title .ltr { opacity: 1; transform: none; }
 }
