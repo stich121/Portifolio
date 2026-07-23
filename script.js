@@ -64,6 +64,60 @@
   }, { passive: true });
   updateScroll();
 
+  const splitText = element => {
+    const text = element.textContent.trim();
+    element.setAttribute('aria-label', text);
+    element.innerHTML = [...text].map(char => {
+      if (char === ' ') return '<span class="ltr space" aria-hidden="true">&nbsp;</span>';
+      const safe = char.replace(/[&<>"']/g, match => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[match]));
+      return `<span class="ltr" aria-hidden="true">${safe}</span>`;
+    }).join('');
+    requestAnimationFrame(() => {
+      element.querySelectorAll('.ltr').forEach((letter, index) => {
+        setTimeout(() => letter.classList.add('in'), 55 + index * 34);
+      });
+    });
+  };
+
+  document.querySelectorAll('[data-split-text]').forEach(splitText);
+
+  const heroReveal = document.querySelector('[data-hero-reveal]');
+  const canPointReveal = !reducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (heroReveal) {
+    const heroCursor = heroReveal.querySelector('.hero-reveal__cursor');
+    const setHeroPoint = (clientX, clientY) => {
+      const rect = heroReveal.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      const x = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+      const y = Math.min(Math.max(clientY - rect.top, 0), rect.height);
+      heroReveal.style.setProperty('--hero-x', `${(x / rect.width) * 100}%`);
+      heroReveal.style.setProperty('--hero-y', `${(y / rect.height) * 100}%`);
+
+      if (heroCursor) {
+        heroCursor.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+      }
+    };
+
+    const centerHeroPoint = () => {
+      const rect = heroReveal.getBoundingClientRect();
+      setHeroPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    };
+
+    centerHeroPoint();
+    heroReveal.classList.add('is-ready');
+    window.addEventListener('resize', centerHeroPoint, { passive: true });
+
+    if (canPointReveal) {
+      heroReveal.addEventListener('pointermove', event => setHeroPoint(event.clientX, event.clientY), { passive: true });
+      heroReveal.addEventListener('pointerenter', event => {
+        heroReveal.classList.add('is-pointing');
+        setHeroPoint(event.clientX, event.clientY);
+      }, { passive: true });
+      heroReveal.addEventListener('pointerleave', () => heroReveal.classList.remove('is-pointing'));
+    }
+  }
   const revealItems = document.querySelectorAll('.reveal');
   if (reducedMotion || !('IntersectionObserver' in window)) {
     revealItems.forEach(item => item.classList.add('is-visible'));
@@ -129,5 +183,4 @@
     });
   }
 })();
-
 
