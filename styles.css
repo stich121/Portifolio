@@ -933,6 +933,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 .hero-final__title .space { width: .32em; }
+.hero-final__title .word-wrap { display: inline-block; }
 
 .hero-final__subtitle {
   min-height: 1.2em;

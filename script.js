@@ -122,14 +122,30 @@
       titleEl.textContent = '';
       titleEl.setAttribute('aria-label', titleText);
       letters.length = 0;
+      let wordWrap = null;
       [...titleText].forEach(char => {
+        if (char === ' ') {
+          const span = document.createElement('span');
+          span.className = 'ltr space';
+          span.setAttribute('aria-hidden', 'true');
+          span.dataset.char = char;
+          span.innerHTML = '&nbsp;';
+          titleEl.appendChild(span);
+          wordWrap = null;
+          return;
+        }
+        if (!wordWrap) {
+          wordWrap = document.createElement('span');
+          wordWrap.className = 'word-wrap';
+          titleEl.appendChild(wordWrap);
+        }
         const span = document.createElement('span');
-        span.className = char === ' ' ? 'ltr space' : 'ltr';
+        span.className = 'ltr';
         span.setAttribute('aria-hidden', 'true');
         span.dataset.char = char;
-        span.innerHTML = char === ' ' ? '&nbsp;' : char;
-        titleEl.appendChild(span);
-        if (char !== ' ') letters.push(span);
+        span.innerHTML = char;
+        wordWrap.appendChild(span);
+        letters.push(span);
       });
       requestAnimationFrame(() => {
         titleEl.querySelectorAll('.ltr').forEach((letter, index) => {
