@@ -356,7 +356,7 @@
       topReady = true;
       requestAnimationFrame(renderFinalHero);
     };
-    topImage.src = finalHero.dataset.topSrc || 'hero-reveal-top.png';
+    topImage.src = finalHero.dataset.topSrc || 'hero-reveal-top.jpg';
   }
   const revealItems = document.querySelectorAll('.reveal');
   if (reducedMotion || !('IntersectionObserver' in window)) {
